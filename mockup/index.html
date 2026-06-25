@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Retail Journey · Richemont · Candidate Journey Candidat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ric: #004165;
+  --ric-dark: #002b45;
+  --ric-light: #e6eff6;
+  --accent: #7ab8d4;
+  --gold: #c9a96e;
+  --white: #ffffff;
+  --bg: #edf1f5;
+  --text: #003352;
+  --muted: #8a9eae;
+  --border: #dde5ed;
+  --success: #2e6e2e;
+  --success-bg: #e6f0e6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-width: 1200px;
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+  background: var(--ric);
+  padding: 40px 60px 32px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  border: 0.5px solid rgba(255,255,255,.08);
+}
+.page-header::after {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  border: 0.5px solid rgba(255,255,255,.05);
+}
+.ph-left { position: relative; z-index: 2; }
+.ph-eyebrow {
+  font-size: 10px; font-weight: 400; letter-spacing: 4px;
+  text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 8px;
+}
+.ph-title {
+  font-family: 'Cormorant Garamond', serif; font-weight: 300;
+  font-size: 42px; color: #fff; line-height: 1; margin-bottom: 6px;
+}
+.ph-title em { font-style: italic; color: rgba(255,255,255,.55); }
+.ph-sub { font-size: 12px; color: rgba(255,255,255,.4); letter-spacing: 1px; }
+.ph-right { position: relative; z-index: 2; text-align: right; }
+.ph-tag {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,.3); margin-bottom: 6px;
+}
+.ph-doc { font-size: 11px; color: rgba(255,255,255,.2); letter-spacing: .5px; }
+
+/* ── JOURNEY LABEL ── */
+.journey-label {
+  padding: 28px 60px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.jl-title {
+  font-size: 11px; font-weight: 500; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--ric);
+}
+.jl-line { flex: 1; height: 0.5px; background: var(--border); }
+.jl-count { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+
+/* ── SCREENS GRID ── */
+.grid {
+  padding: 0 40px 60px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: center;
+}
+
+/* ── PHONE ── */
+.phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.phone-shell {
+  width: 240px;
+  background: #1a1a1c;
+  border-radius: 42px;
+  padding: 8px;
+  border: 1px solid #2c2c2e;
+  flex-shrink: 0;
+}
+.phone-screen {
+  width: 100%;
+  height: 490px;
+  border-radius: 35px;
+  overflow: hidden;
+  position: relative;
+  background: #fff;
+}
+.di {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  width: 68px; height: 21px; background: #000; border-radius: 16px; z-index: 20;
+}
+.sb {
+  position: absolute; top: 0; left: 0; right: 0; height: 36px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 0 18px 5px; z-index: 15; font-size: 9px; font-weight: 500;
+}
+.sb-w { color: rgba(255,255,255,.7); }
+.sb-b { color: var(--ric); }
+.sb-d { color: rgba(255,255,255,.25); }
+
+/* ── SCREEN LABEL ── */
+.screen-label {
+  width: 240px;
+  text-align: center;
+}
+.sl-num {
+  font-size: 9px; font-weight: 500; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--ric); margin-bottom: 3px;
+}
+.sl-name {
+  font-size: 11px; color: var(--text); font-weight: 400; line-height: 1.4;
+}
+.sl-desc {
+  font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.5;
+}
+
+/* ── COMMON SCREEN ELEMENTS ── */
+.hdr { padding: 36px 18px 16px; }
+.hdr-ric { background: var(--ric); }
+.hdr-dark { background: var(--ric-dark); }
+.hdr-white { background: #fff; border-bottom: 0.5px solid var(--border); }
+
+.ey { font-size: 8px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.38); margin-bottom: 6px; font-weight: 400; }
+.ey-b { font-size: 8px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 400; }
+.ht { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 20px; color: #fff; line-height: 1.15; margin-bottom: 3px; }
+.ht-b { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 20px; color: var(--text); line-height: 1.15; margin-bottom: 3px; }
+.hs { font-size: 9px; color: rgba(255,255,255,.35); letter-spacing: .5px; }
+.hs-b { font-size: 9px; color: var(--muted); letter-spacing: .5px; }
+
+.body { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+.foot { padding: 0 16px 16px; }
+
+.btn-w { width: 100%; background: #fff; border: none; border-radius: 3px; color: var(--ric); font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; padding: 12px 0; cursor: pointer; display: block; margin-bottom: 7px; }
+.btn-b { width: 100%; background: var(--ric); border: none; border-radius: 3px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; padding: 12px 0; cursor: pointer; display: block; margin-bottom: 7px; }
+.btn-o { width: 100%; background: transparent; border: 0.5px solid rgba(255,255,255,.2); border-radius: 3px; color: rgba(255,255,255,.4); font-family: 'DM Sans', sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 0; cursor: pointer; display: block; }
+
+.card { background: #fff; border: 0.5px solid var(--border); border-radius: 7px; padding: 10px 12px; }
+.card-dk { background: rgba(255,255,255,.05); border: 0.5px solid rgba(255,255,255,.1); border-radius: 7px; padding: 10px 12px; }
+
+.lbl { font-size: 8px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.lbl-w { font-size: 8px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.28); margin-bottom: 4px; }
+.lbl-b { font-size: 8px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--ric); margin-bottom: 4px; }
+.txt { font-size: 10px; color: #3a4e5e; line-height: 1.6; }
+.txt-w { font-size: 10px; color: rgba(255,255,255,.55); line-height: 1.6; }
+
+.fl { display: flex; flex-direction: column; gap: 4px; }
+.fl-lbl { font-size: 8px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.fl-val { background: #fff; border: 0.5px solid var(--border); border-radius: 4px; padding: 8px 11px; font-size: 11px; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
+
+.chip-row { display: flex; gap: 4px; flex-wrap: wrap; }
+.chip { font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 4px 9px; border-radius: 20px; border: 0.5px solid var(--border); color: #6a7e8e; }
+.chip-on { background: var(--ric); color: #fff; border-color: var(--ric); }
+
+.tag { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; }
+.tg-b { background: var(--ric-light); color: var(--ric); }
+.tg-g { background: #eef1f3; color: #5a6e7e; }
+
+.prog-track { display: flex; gap: 3px; margin-top: 10px; }
+.ps { flex: 1; height: 1.5px; background: rgba(255,255,255,.15); border-radius: 1px; }
+.ps-on { background: #fff; }
+.ps-half { background: rgba(255,255,255,.45); }
+
+.step-card { background: #fff; border: 0.5px solid var(--border); border-radius: 7px; padding: 9px 12px; display: flex; align-items: center; gap: 10px; }
+.step-card-dim { opacity: .42; }
+.step-ic { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ic-done { background: var(--success-bg); }
+.ic-act { background: var(--ric-light); border: 1px solid var(--ric); }
+.ic-lock { background: #eef1f3; }
+.step-t { font-size: 11px; font-weight: 500; color: var(--text); margin-bottom: 1px; }
+.step-s { font-size: 9px; color: var(--muted); }
+.badge { font-size: 8px; font-weight: 500; padding: 2px 7px; border-radius: 8px; margin-left: auto; flex-shrink: 0; }
+.bd-done { background: var(--success-bg); color: var(--success); }
+.bd-act { background: var(--ric-light); color: var(--ric); }
+.bd-lock { background: #eef1f3; color: #9aaebc; }
+
+.opt { background: #fff; border: 0.5px solid var(--border); border-radius: 5px; padding: 9px 11px; display: flex; align-items: flex-start; gap: 8px; }
+.opt-on { border-color: var(--ric); background: #f0f6fb; }
+.opt-dk { background: rgba(255,255,255,.04); border: 0.5px solid rgba(255,255,255,.1); border-radius: 5px; padding: 9px 11px; display: flex; align-items: flex-start; gap: 8px; }
+.opt-dk-on { border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.08); }
+.opt-l { font-size: 10px; font-weight: 500; color: var(--ric); flex-shrink: 0; width: 12px; margin-top: 1px; }
+.opt-t { font-size: 10px; color: #3a4e5e; line-height: 1.4; }
+.opt-t-w { font-size: 10px; color: rgba(255,255,255,.55); line-height: 1.4; }
+.opt-t-w-on { color: #fff; }
+
+.radio { width: 14px; height: 14px; border-radius: 50%; border: 0.5px solid rgba(255,255,255,.2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.radio-on { border-color: #fff; background: #fff; }
+.rdot { width: 5px; height: 5px; background: var(--ric); border-radius: 50%; }
+
+.scale-dots { display: flex; gap: 6px; justify-content: center; }
+.scl { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center; font-size: 9px; color: rgba(255,255,255,.25); }
+.scl-on { background: #fff; border-color: #fff; color: var(--ric); font-weight: 500; }
+
+.sk { display: flex; flex-direction: column; gap: 3px; }
+.sk-name { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,.28); }
+.sk-bg { height: 1.5px; background: rgba(255,255,255,.08); border-radius: 1px; }
+.sk-fill { height: 100%; background: var(--accent); border-radius: 1px; }
+.sk-v { font-size: 10px; color: var(--accent); font-weight: 500; }
+
+.nav { background: #fff; border-top: 0.5px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding: 6px 0 10px; }
+.ni { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.nd { width: 3px; height: 3px; border-radius: 50%; background: var(--ric); }
+.nd-off { width: 3px; height: 3px; border-radius: 50%; background: #c8d4de; }
+.nl { font-size: 7px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.nl-on { color: var(--ric); }
+
+.ob-card { background: rgba(255,255,255,.06); border: 0.5px solid rgba(255,255,255,.12); border-radius: 7px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+.ob-ic { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ob-t { font-size: 10px; font-weight: 500; color: #fff; margin-bottom: 2px; }
+.ob-s { font-size: 9px; color: rgba(255,255,255,.3); }
+
+/* ── VIDEO CARD ── */
+.vid-card { background: var(--ric-dark); border-radius: 7px; overflow: hidden; height: 76px; position: relative; display: flex; align-items: flex-end; }
+.vid-grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px); background-size: 16px 16px; }
+.vid-content { position: relative; z-index: 2; padding: 10px 12px; width: 100%; }
+.vid-title { font-family: 'Cormorant Garamond', serif; font-size: 14px; color: #fff; margin-bottom: 2px; }
+.vid-sub { font-size: 8px; color: rgba(255,255,255,.35); letter-spacing: 1px; }
+.play-ic { position: absolute; top: 50%; right: 13px; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center; z-index: 3; }
+.tri { width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 7px solid #fff; margin-left: 2px; }
+
+/* ── REVIEW / FEEDBACK ── */
+.star-row { display: flex; gap: 3px; }
+.star { font-size: 14px; color: var(--ric); }
+.star-off { font-size: 14px; color: var(--border); }
+
+/* ── SLOT / IV ── */
+.slot { font-size: 9px; letter-spacing: .5px; padding: 5px 9px; border-radius: 3px; border: 0.5px solid var(--border); color: #3a4e5e; }
+.slot-on { background: var(--ric); color: #fff; border-color: var(--ric); }
+
+/* ── GHOST WARNING ── */
+.ghost-box { background: #fff8e6; border: 0.5px solid #f0d080; border-radius: 5px; padding: 9px 11px; display: flex; gap: 8px; align-items: flex-start; }
+.ghost-t { font-size: 10px; color: #7a5e10; line-height: 1.5; }
+
+/* ── MAISON CARD ── */
+.mc { background: #fff; border: 0.5px solid var(--border); border-radius: 7px; overflow: hidden; display: flex; align-items: stretch; height: 54px; }
+.mc-strip { width: 3px; flex-shrink: 0; }
+.mc-body { flex: 1; padding: 9px 12px; display: flex; flex-direction: column; justify-content: center; }
+.mc-name { font-size: 10px; font-weight: 500; color: var(--text); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1px; }
+.mc-desc { font-size: 9px; color: var(--muted); }
+.mc-right { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding: 9px 12px; gap: 3px; }
+.play-sm { width: 22px; height: 22px; border-radius: 50%; background: var(--ric); display: flex; align-items: center; justify-content: center; }
+.tri-sm { width: 0; height: 0; border-top: 3px solid transparent; border-bottom: 3px solid transparent; border-left: 6px solid #fff; margin-left: 1px; }
+.mc-posts { font-size: 8px; color: #b0bec5; }
+
+/* ── RING ── */
+.ring-row { display: flex; align-items: center; gap: 13px; }
+.score-big { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; color: #fff; line-height: 1; }
+.score-lbl { font-size: 8px; color: rgba(255,255,255,.3); letter-spacing: 1.5px; text-transform: uppercase; }
+.score-m { font-size: 9px; color: rgba(255,255,255,.5); font-style: italic; margin-top: 2px; }
+
+/* ── ONBOARDING PROGRESS ── */
+.onb-prog { display: flex; flex-direction: column; gap: 6px; }
+.onb-row { display: flex; align-items: center; gap: 8px; }
+.onb-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.onb-line { flex: 1; height: 1px; background: var(--accent); }
+.onb-line-off { flex: 1; height: 1px; background: rgba(255,255,255,.1); }
+
+/* ── FEEDBACK / RETOUR ── */
+.ret-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--success-bg); border-radius: 4px; padding: 5px 10px; }
+.ret-t { font-size: 10px; font-weight: 500; color: var(--success); }
+
+/* ── PAGE FOOTER ── */
+.page-footer {
+  background: var(--ric);
+  padding: 28px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pf-left { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; color: rgba(255,255,255,.6); }
+.pf-left em { font-style: italic; }
+.pf-center { font-size: 10px; color: rgba(255,255,255,.25); letter-spacing: 2px; text-transform: uppercase; }
+.pf-right { font-size: 10px; color: rgba(255,255,255,.25); letter-spacing: 1px; }
+
+.ico { display: inline-flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="ph-left">
+    <div class="ph-eyebrow">Richemont · HR Tech</div>
+    <div class="ph-title">My Retail <em>Journey</em></div>
+    <div class="ph-sub">Candidate Journey · Application mobile · Version 1.0</div>
+  </div>
+  <div class="ph-right">
+    <div class="ph-tag">Projet pilote · Groupe Richemont</div>
+    <div class="ph-doc">Document de présentation · Confidentiel</div>
+  </div>
+</div>
+
+<!-- JOURNEY LABEL -->
+<div class="journey-label">
+  <div class="jl-title">Parcours complet candidat</div>
+  <div class="jl-line"></div>
+  <div class="jl-count">12 écrans · De l'inscription au premier jour</div>
+</div>
+
+<!-- SCREENS GRID -->
+<div class="grid">
+
+  <!-- ══ 01 SPLASH ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:#004165;">
+        <div class="di"></div>
+        <div class="sb sb-w"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div style="position:absolute;inset:0;overflow:hidden;">
+          <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:24px 24px;"></div>
+          <div style="position:absolute;top:-40px;right:-40px;width:210px;height:210px;border-radius:50%;border:0.5px solid rgba(255,255,255,.1);"></div>
+          <div style="position:absolute;top:0px;right:0px;width:130px;height:130px;border-radius:50%;border:0.5px solid rgba(255,255,255,.07);"></div>
+        </div>
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:0 20px 36px;">
+          <div class="ey">Richemont</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:300;font-size:38px;color:#fff;line-height:.9;margin-bottom:7px;">My Retail<br><em style="color:rgba(255,255,255,.55);">Journey</em></div>
+          <div style="font-size:9px;color:rgba(255,255,255,.3);letter-spacing:2.5px;margin-bottom:30px;">My Retail Journey · Maisons de luxe</div>
+          <div style="width:24px;height:1px;background:rgba(255,255,255,.22);margin-bottom:22px;"></div>
+          <button class="btn-w">Commencer mon parcours</button>
+          <button class="btn-o">J'ai déjà un compte</button>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 01</div>
+      <div class="sl-name">Splash · Accueil</div>
+      <div class="sl-desc">Premier contact avec l'application. Identité Richemont immédiate.</div>
+    </div>
+  </div>
+
+  <!-- ══ 02 INSCRIPTION ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:#f4f7fa;display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-w"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-ric">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
+            <div class="ey" style="margin:0;">Étape 1 · Profil</div>
+            <div style="font-size:8px;color:rgba(255,255,255,.22);letter-spacing:1px;">1 / 5</div>
+          </div>
+          <div class="prog-track">
+            <div class="ps ps-half"></div>
+            <div class="ps"></div><div class="ps"></div><div class="ps"></div><div class="ps"></div>
+          </div>
+        </div>
+        <div class="body">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:var(--text);line-height:1.3;">Créez votre profil<br>en quelques secondes</div>
+          <div class="fl">
+            <div class="fl-lbl">Prénom &amp; nom</div>
+            <div class="fl-val">Sophie Marchand <span style="color:var(--ric);font-size:10px;">✓</span></div>
+          </div>
+          <div class="fl">
+            <div class="fl-lbl">Expérience retail</div>
+            <div class="fl-val"><span>2 à 5 ans</span><span style="color:#b0bec5;font-size:9px;">▾</span></div>
+          </div>
+          <div class="fl">
+            <div class="fl-lbl">Zone géographique</div>
+            <div class="fl-val"><span>Paris · Île-de-France</span></div>
+          </div>
+          <div class="fl">
+            <div class="fl-lbl">Disponibilités</div>
+            <div class="chip-row">
+              <span class="chip chip-on">CDI</span>
+              <span class="chip">CDD</span>
+              <span class="chip chip-on">Alternance</span>
+              <span class="chip">Stage</span>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><button class="btn-b">Continuer →</button></div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 02</div>
+      <div class="sl-name">Profil simplifié</div>
+      <div class="sl-desc">Remplace le CV classique. Infos essentielles uniquement.</div>
+    </div>
+  </div>
+
+  <!-- ══ 03 TABLEAU DE BORD ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:#f4f7fa;display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-w"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-ric">
+          <div class="ey">Bonjour Sophie</div>
+          <div class="ht">Votre parcours</div>
+          <div class="hs">5 étapes · Environ 25 min</div>
+        </div>
+        <div class="body">
+          <div class="step-card">
+            <div class="step-ic ic-done">
+              <svg width="12" height="12" fill="none" stroke="#2e6e2e" stroke-width="2" stroke-linecap="round" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5"/></svg>
+            </div>
+            <div><div class="step-t">Profil &amp; motivations</div><div class="step-s">Complété · 3 min</div></div>
+            <span class="badge bd-done">Fait</span>
+          </div>
+          <div class="step-card">
+            <div class="step-ic ic-act"><span style="font-size:10px;color:var(--ric);">◆</span></div>
+            <div><div class="step-t">Test de personnalité</div><div class="step-s">En cours · 8 questions</div></div>
+            <span class="badge bd-act">Actif</span>
+          </div>
+          <div class="step-card step-card-dim">
+            <div class="step-ic ic-lock"><span style="font-size:10px;color:#9aaebc;">◻</span></div>
+            <div><div class="step-t">Découverte des Maisons</div><div class="step-s">Vidéos immersives</div></div>
+            <span class="badge bd-lock">Verrouillé</span>
+          </div>
+          <div class="step-card step-card-dim">
+            <div class="step-ic ic-lock"><span style="font-size:10px;color:#9aaebc;">◻</span></div>
+            <div><div class="step-t">Mises en situation</div><div class="step-s">5 scénarios</div></div>
+            <span class="badge bd-lock">Verrouillé</span>
+          </div>
+          <div class="step-card step-card-dim">
+            <div class="step-ic ic-lock"><span style="font-size:10px;color:#9aaebc;">◻</span></div>
+            <div><div class="step-t">Synthèse &amp; entretien</div><div class="step-s">Score · RDV RH</div></div>
+            <span class="badge bd-lock">Verrouillé</span>
+          </div>
+        </div>
+        <div class="nav">
+          <div class="ni"><div class="nd-off"></div><div class="nl">Accueil</div></div>
+          <div class="ni"><div class="nd"></div><div class="nl nl-on">Parcours</div></div>
+          <div class="ni"><div class="nd-off"></div><div class="nl">Maisons</div></div>
+          <div class="ni"><div class="nd-off"></div><div class="nl">Profil</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 03</div>
+      <div class="sl-name">Tableau de bord</div>
+      <div class="sl-desc">Vue d'ensemble du parcours. Étapes progressives déverrouillées.</div>
+    </div>
+  </div>
+
+  <!-- ══ 04 TEST PERSO ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:var(--ric-dark);display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-d"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-dark">
+          <div class="ey">Test de personnalité · Étape 2</div>
+          <div style="float:right;font-size:8px;color:rgba(255,255,255,.2);letter-spacing:1px;margin-top:2px;">3 / 8</div>
+          <div class="ht">Face à une situation imprévue, vous avez tendance à…</div>
+        </div>
+        <div class="body">
+          <div class="opt-dk opt-dk-on">
+            <div class="radio radio-on"><div class="rdot"></div></div>
+            <div class="opt-t-w opt-t-w-on">Garder votre calme et analyser avant d'agir</div>
+          </div>
+          <div class="opt-dk">
+            <div class="radio"></div>
+            <div class="opt-t-w">Réagir immédiatement et vous adapter en cours d'action</div>
+          </div>
+          <div class="opt-dk">
+            <div class="radio"></div>
+            <div class="opt-t-w">Consulter un collègue ou supérieur avant de décider</div>
+          </div>
+          <div style="margin-top:4px;">
+            <div class="lbl-w" style="margin-bottom:7px;">Intensité de ce trait</div>
+            <div class="scale-dots">
+              <div class="scl">1</div>
+              <div class="scl">2</div>
+              <div class="scl scl-on">3</div>
+              <div class="scl">4</div>
+              <div class="scl">5</div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><button class="btn-w">Question suivante →</button></div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 04</div>
+      <div class="sl-name">Test de personnalité</div>
+      <div class="sl-desc">Questions comportementales. Évalue l'adéquation avec le retail de luxe.</div>
+    </div>
+  </div>
+
+  <!-- ══ 05 QUESTIONS MOTIVATION ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:var(--ric-dark);display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-d"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-dark">
+          <div class="ey">Questions de motivation · Étape 2</div>
+          <div style="float:right;font-size:8px;color:rgba(255,255,255,.2);letter-spacing:1px;margin-top:2px;">6 / 8</div>
+          <div class="ht">Pourquoi souhaitez-vous travailler dans le retail de luxe ?</div>
+        </div>
+        <div class="body">
+          <div class="opt-dk opt-dk-on">
+            <div class="radio radio-on"><div class="rdot"></div></div>
+            <div class="opt-t-w opt-t-w-on">L'excellence du service et la relation client haut de gamme m'attirent profondément</div>
+          </div>
+          <div class="opt-dk">
+            <div class="radio"></div>
+            <div class="opt-t-w">L'univers du luxe, les produits et l'histoire des Maisons m'inspirent</div>
+          </div>
+          <div class="opt-dk">
+            <div class="radio"></div>
+            <div class="opt-t-w">La perspective d'évolution et les opportunités de carrière internationales</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.08);border-radius:5px;padding:9px 11px;margin-top:2px;">
+            <div class="lbl-w" style="margin-bottom:5px;">Recommandation personnalisée</div>
+            <div class="txt-w">D'après vos réponses, les postes <strong style="color:#fff;">Conseiller VIP</strong> et <strong style="color:#fff;">SAV Horlogerie</strong> correspondent à votre profil.</div>
+          </div>
+        </div>
+        <div class="foot"><button class="btn-w">Continuer →</button></div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 05</div>
+      <div class="sl-name">Questions de motivation</div>
+      <div class="sl-desc">Identification des motivations réelles. Recommandation de postes adaptés.</div>
+    </div>
+  </div>
+
+  <!-- ══ 06 MAISONS VIDEOS ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:#f4f7fa;display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-w"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-ric">
+          <div class="ey">Étape 3 · Découverte</div>
+          <div class="ht">Les Maisons</div>
+          <div class="hs">Vidéos immersives · Réalité terrain</div>
+        </div>
+        <div class="body">
+          <div class="lbl">Recommandé pour vous</div>
+          <div class="vid-card">
+            <div class="vid-grid-bg"></div>
+            <div class="vid-content">
+              <div class="vid-title">Cartier · La boutique</div>
+              <div class="vid-sub">JOAILLERIE · 4 MIN · RÉALITÉ TERRAIN</div>
+            </div>
+            <div class="play-ic"><div class="tri"></div></div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <div style="flex:1;background:#fff;border:.5px solid var(--border);border-radius:6px;padding:8px 10px;">
+              <div class="lbl">Missions</div>
+              <div class="txt">Accueil · Conseil produit · Atteinte objectifs · SAV</div>
+            </div>
+            <div style="flex:1;background:#fff;border:.5px solid var(--border);border-radius:6px;padding:8px 10px;">
+              <div class="lbl">Contraintes</div>
+              <div class="txt">Horaires décalés · Pression · Exigences relationnelles</div>
+            </div>
+          </div>
+          <div class="mc"><div class="mc-strip" style="background:#8b0000;"></div><div class="mc-body"><div class="mc-name">Van Cleef &amp; Arpels</div><div class="mc-desc">Haute joaillerie · Place Vendôme</div></div><div class="mc-right"><div class="play-sm"><div class="tri-sm"></div></div><div class="mc-posts">8 postes</div></div></div>
+          <div class="mc"><div class="mc-strip" style="background:#1a3a5a;"></div><div class="mc-body"><div class="mc-name">IWC Schaffhausen</div><div class="mc-desc">Horlogerie · Zurich</div></div><div class="mc-right"><div class="play-sm"><div class="tri-sm"></div></div><div class="mc-posts">5 postes</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 06</div>
+      <div class="sl-name">Découverte des Maisons</div>
+      <div class="sl-desc">Vidéos immersives montrant la réalité terrain. Missions ET contraintes visibles.</div>
+    </div>
+  </div>
+
+  <!-- ══ 07 QUIZ COMPETENCES ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:#f4f7fa;display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-b"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-white">
+          <div class="ey-b">Quiz comportemental · Étape 4</div>
+          <div class="ht-b">Sens du service<br>&amp; communication</div>
+          <div class="hs-b">Question 2 / 6 · Compétences clés retail</div>
+        </div>
+        <div class="body">
+          <div class="card" style="border-left:2px solid var(--ric);border-radius:0 6px 6px 0;">
+            <div class="lbl-b">Scénario</div>
+            <div class="txt">Un client hésitant vous demande conseil pour un cadeau de 5 000 €. Il n'a aucune idée du budget de sa femme. Comment procédez-vous ?</div>
+          </div>
+          <div class="opt opt-on">
+            <span class="opt-l">A</span>
+            <span class="opt-t">J'explore ses valeurs et habitudes pour proposer une pièce qui fait sens pour eux.</span>
+          </div>
+          <div class="opt">
+            <span class="opt-l">B</span>
+            <span class="opt-t">Je présente nos meilleures ventes dans cette gamme de prix.</span>
+          </div>
+          <div class="opt">
+            <span class="opt-l">C</span>
+            <span class="opt-t">Je lui propose de revenir avec sa femme pour un rendez-vous personnalisé.</span>
+          </div>
+        </div>
+        <div class="foot"><button class="btn-b">Valider ma réponse →</button></div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 07</div>
+      <div class="sl-name">Quiz comportemental</div>
+      <div class="sl-desc">Évalue les soft skills : sens du service, communication, adaptabilité.</div>
+    </div>
+  </div>
+
+  <!-- ══ 08 MISE EN SITUATION ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:#f4f7fa;display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-w"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-dark">
+          <div class="ey" style="color:rgba(255,255,255,.3);">Étape 4 · Scénario 3/5</div>
+          <div class="ht">Gestion d'un client difficile</div>
+          <div style="display:flex;align-items:center;gap:7px;margin-top:9px;">
+            <span style="font-size:9px;color:var(--accent);font-weight:500;letter-spacing:1px;flex-shrink:0;">2:14</span>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"><div style="height:100%;width:55%;background:var(--accent);"></div></div>
+            <span style="font-size:8px;color:var(--accent);background:rgba(122,184,212,.12);padding:2px 7px;border-radius:2px;letter-spacing:2px;text-transform:uppercase;flex-shrink:0;">En cours</span>
+          </div>
+        </div>
+        <div class="body">
+          <div style="background:#fff;border-radius:5px;border-left:2px solid var(--ric);border-top:.5px solid var(--border);border-right:.5px solid var(--border);border-bottom:.5px solid var(--border);padding:9px 12px;">
+            <div class="lbl-b">Situation</div>
+            <div class="txt">Un client VIP arrive très agité. Sa montre présente un défaut. La file d'attente se forme derrière lui. Il élève la voix.</div>
+          </div>
+          <div class="lbl">Votre réaction</div>
+          <div class="opt opt-on"><span class="opt-l">A</span><span class="opt-t">Je l'invite dans un espace privé et contacte le SAV immédiatement.</span></div>
+          <div class="opt"><span class="opt-l">B</span><span class="opt-t">Je lui explique la procédure et lui demande de patienter.</span></div>
+          <div class="opt"><span class="opt-l">C</span><span class="opt-t">Je préviens mon manager avant de répondre.</span></div>
+        </div>
+        <div class="foot"><button class="btn-b">Confirmer ma réponse →</button></div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 08</div>
+      <div class="sl-name">Mise en situation</div>
+      <div class="sl-desc">Scénarios réels construits avec les équipes RH terrain. Chrono inclus.</div>
+    </div>
+  </div>
+
+  <!-- ══ 09 SYNTHESE ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:var(--ric-dark);display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-d"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-dark">
+          <div class="ey">Étape 5 · Résultats</div>
+          <div class="ht">Votre synthèse</div>
+          <div class="hs">Sophie Marchand · Cartier Paris</div>
+        </div>
+        <div class="body">
+          <div class="card-dk">
+            <div class="ring-row">
+              <svg width="54" height="54" viewBox="0 0 54 54">
+                <circle cx="27" cy="27" r="22" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="3"/>
+                <circle cx="27" cy="27" r="22" fill="none" stroke="#7ab8d4" stroke-width="3"
+                  stroke-dasharray="138" stroke-dashoffset="28"
+                  stroke-linecap="round" transform="rotate(-90 27 27)"/>
+              </svg>
+              <div>
+                <div class="score-big">80%</div>
+                <div class="score-lbl">Compatibilité</div>
+                <div class="score-m">Profil très recommandé</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div class="card-dk"><div class="sk"><div class="sk-name">Sens du service</div><div class="sk-bg"><div class="sk-fill" style="width:90%"></div></div><div class="sk-v">90%</div></div></div>
+            <div class="card-dk"><div class="sk"><div class="sk-name">Gestion stress</div><div class="sk-bg"><div class="sk-fill" style="width:75%"></div></div><div class="sk-v">75%</div></div></div>
+            <div class="card-dk"><div class="sk"><div class="sk-name">Communication</div><div class="sk-bg"><div class="sk-fill" style="width:85%"></div></div><div class="sk-v">85%</div></div></div>
+            <div class="card-dk"><div class="sk"><div class="sk-name">Adaptabilité</div><div class="sk-bg"><div class="sk-fill" style="width:70%"></div></div><div class="sk-v">70%</div></div></div>
+          </div>
+          <div style="background:rgba(255,255,255,.06);border:.5px solid rgba(255,255,255,.18);border-radius:6px;padding:10px 12px;display:flex;align-items:center;gap:9px;">
+            <div style="width:24px;height:24px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5l1.2 2.4 2.7.38-1.95 1.9.46 2.7L6 7.8l-2.41 1.1.46-2.7L2.1 4.28l2.7-.38z" fill="var(--ric)"/></svg>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:500;color:#fff;margin-bottom:1px;">Entretien recommandé</div>
+              <div style="font-size:8px;color:rgba(255,255,255,.3);">Planifiez votre RDV RH via l'application</div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><button class="btn-w">Planifier mon entretien →</button></div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 09</div>
+      <div class="sl-name">Synthèse &amp; score</div>
+      <div class="sl-desc">Score de compatibilité global + détail par soft skill. Envoyé aux RH.</div>
+    </div>
+  </div>
+
+  <!-- ══ 10 RDV ENTRETIEN ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:#f4f7fa;display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-b"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-white">
+          <div class="ey-b">Entretien · Planification</div>
+          <div class="ht-b">Choisissez<br>votre créneau</div>
+          <div class="hs-b">Cartier · Champs-Élysées · RH</div>
+        </div>
+        <div class="body">
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+              <div style="width:34px;height:34px;border-radius:50%;background:var(--ric-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--ric);flex-shrink:0;">MR</div>
+              <div>
+                <div style="font-size:11px;font-weight:500;color:var(--text);margin-bottom:1px;">Marie Renault</div>
+                <div style="font-size:9px;color:var(--muted);">Talent Acquisition · Cartier</div>
+              </div>
+            </div>
+            <div class="lbl">Créneaux disponibles</div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;">
+              <span class="slot slot-on">Lun 14/04 · 10h</span>
+              <span class="slot">Lun 14/04 · 14h</span>
+              <span class="slot">Mar 15/04 · 11h</span>
+              <span class="slot">Mer 16/04 · 9h30</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="lbl">Format d'entretien</div>
+            <div style="display:flex;gap:6px;margin-top:5px;">
+              <span class="slot slot-on">Présentiel</span>
+              <span class="slot">Visioconférence</span>
+            </div>
+          </div>
+          <div class="ghost-box">
+            <span style="font-size:12px;flex-shrink:0;">⚡</span>
+            <div class="ghost-t">Retour systématique après chaque étape. Anti-ghosting garanti.</div>
+          </div>
+        </div>
+        <div class="foot"><button class="btn-b">Confirmer le RDV →</button></div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 10</div>
+      <div class="sl-name">Prise de RDV</div>
+      <div class="sl-desc">Planification de l'entretien directement dans l'app. Anti-ghosting garanti.</div>
+    </div>
+  </div>
+
+  <!-- ══ 11 RETOUR CANDIDAT ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:#f4f7fa;display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-b"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-white">
+          <div class="ey-b">Post-entretien · Feedback</div>
+          <div class="ht-b">Votre retour<br>d'entretien</div>
+          <div class="hs-b">Cartier · 14 avril 2024</div>
+        </div>
+        <div class="body">
+          <div class="card" style="border-left:2px solid var(--success);border-radius:0 6px 6px 0;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+              <div style="width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0;"></div>
+              <div style="font-size:10px;font-weight:500;color:var(--success);">Candidature retenue</div>
+            </div>
+            <div class="txt">Votre profil correspond parfaitement aux attentes de la Maison Cartier. Nous souhaitons vous rencontrer pour la prochaine étape.</div>
+          </div>
+          <div class="lbl">Évaluations reçues</div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span style="font-size:10px;color:var(--text);">Présentation</span>
+              <div class="star-row"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star-off">★</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span style="font-size:10px;color:var(--text);">Motivation</span>
+              <div class="star-row"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:10px;color:var(--text);">Soft skills</span>
+              <div class="star-row"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star-off">★</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="lbl">Commentaire recruteur</div>
+            <div class="txt">"Très bon sens du service, réactivité appréciée. À développer : connaissance produit horlogerie."</div>
+          </div>
+        </div>
+        <div class="foot"><button class="btn-b">Voir l'étape suivante →</button></div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 11</div>
+      <div class="sl-name">Retour candidat</div>
+      <div class="sl-desc">Feedback structuré post-entretien. Élimine le ghosting. Améliore l'expérience candidat.</div>
+    </div>
+  </div>
+
+  <!-- ══ 12 PRE-ONBOARDING ══ -->
+  <div class="phone-wrap">
+    <div class="phone-shell">
+      <div class="phone-screen" style="background:var(--ric-dark);display:flex;flex-direction:column;">
+        <div class="di"></div>
+        <div class="sb sb-d"><span>9:41</span><span>●●● ▌▌▌</span></div>
+        <div class="hdr hdr-dark">
+          <div class="ey">Félicitations Sophie !</div>
+          <div class="ht">Bienvenue chez<br>Cartier</div>
+          <div class="hs">Votre pré-onboarding commence ici</div>
+        </div>
+        <div class="body">
+          <div class="ob-card">
+            <div class="ob-ic">
+              <svg width="12" height="12" fill="none" stroke="#7ab8d4" stroke-width="1.5" stroke-linecap="round" viewBox="0 0 12 12"><rect x="1.5" y="2.5" width="9" height="8" rx="1.5"/><path d="M4 2.5V1.5M8 2.5V1.5M1.5 6h9"/></svg>
+            </div>
+            <div><div class="ob-t">Votre prise de poste</div><div class="ob-s">Lundi 28 avril · Boutique Champs-Élysées</div></div>
+          </div>
+          <div class="ob-card">
+            <div class="ob-ic">
+              <svg width="12" height="12" fill="none" stroke="#7ab8d4" stroke-width="1.5" stroke-linecap="round" viewBox="0 0 12 12"><circle cx="6" cy="4.5" r="2"/><path d="M1.5 10.5c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg>
+            </div>
+            <div><div class="ob-t">Votre équipe boutique</div><div class="ob-s">6 collaborateurs · Manager : Lucas D.</div></div>
+          </div>
+          <div class="ob-card">
+            <div class="ob-ic">
+              <svg width="12" height="12" fill="none" stroke="#7ab8d4" stroke-width="1.5" stroke-linecap="round" viewBox="0 0 12 12"><path d="M6 1.5l1.2 2.4 2.7.38-1.95 1.9.46 2.7L6 7.8l-2.41 1.1.46-2.7L2.1 4.28l2.7-.38z"/></svg>
+            </div>
+            <div><div class="ob-t">Standards de la Maison</div><div class="ob-s">Codes Cartier · Art de vivre · Excellence</div></div>
+          </div>
+          <div class="ob-card">
+            <div class="ob-ic">
+              <svg width="12" height="12" fill="none" stroke="#7ab8d4" stroke-width="1.5" stroke-linecap="round" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10"/></svg>
+            </div>
+            <div><div class="ob-t">Suivi intégration 30j</div><div class="ob-s">Feedback continu · Expérience collaborateur</div></div>
+          </div>
+        </div>
+        <div class="foot"><button class="btn-w">Accéder à mon onboarding →</button></div>
+      </div>
+    </div>
+    <div class="screen-label">
+      <div class="sl-num">Écran 12</div>
+      <div class="sl-name">Pré-onboarding</div>
+      <div class="sl-desc">Intégration préparée avant le premier jour. Réduit le turnover précoce.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PAGE FOOTER -->
+<div class="page-footer">
+  <div class="pf-left">My Retail <em>Journey</em></div>
+  <div class="pf-center">Candidate Journey · Version candidat · Confidentiel</div>
+  <div class="pf-right">Richemont · 2024</div>
+</div>
+
+</body>
+</html>
