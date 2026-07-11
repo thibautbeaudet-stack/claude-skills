@@ -11,6 +11,7 @@ Ce dossier contient tout ce qu'il faut pour ajouter le module **Véhicules** à 
 - **Sheet Budget** ("Suivi Tohmo Hub") : Sheet lié au projet Apps Script (`SpreadsheetApp.getActive()`).
 - **Sheet Tickets** ("Tohmo Hub - Tickets"), séparé : ID `1upy9uyN-g3afAEkOgpx806plCcEsL_bx75raPnsfTfI`, ouvert via `SpreadsheetApp.openById(SS_TICKETS_ID)`.
 - **Sheet Véhicules**, séparé (celui fourni par l'utilisateur comme base de données du module) : ID `19mNkzcSMTwrl5Nx4QzApZDNTQLB2bntWl_76lRVzCYU` (`https://docs.google.com/spreadsheets/d/19mNkzcSMTwrl5Nx4QzApZDNTQLB2bntWl_76lRVzCYU/edit`), ouvert via `SpreadsheetApp.openById(SS_VEHICULES_ID)`. **Important** : cette session Claude n'a pas de connecteur Google Sheets — impossible de créer les onglets/en-têtes directement dans ce fichier depuis la conversation. La fonction `creerOngletsVehicules()` (voir étape 2) le fait à ta place, une fois collée et exécutée dans Apps Script.
+- **Dossier Drive Véhicules**, séparé (celui fourni par l'utilisateur comme dossier parent des documents véhicules) : ID `1QuMgPpvDdO0HZE2cPRznU99rFTTQm7-r` (`https://drive.google.com/drive/folders/1QuMgPpvDdO0HZE2cPRznU99rFTTQm7-r`), un sous-dossier par véhicule (nommé d'après l'immatriculation). **Important** : Claude n'a pas non plus de connecteur Google Drive — impossible de parcourir ce dossier ou de lier les sous-dossiers depuis la conversation. À la place, `addVehicule()` retrouve (ou crée) automatiquement le bon sous-dossier via `DriveApp` quand tu ajoutes un véhicule ; `synchroniserDossiersDriveVehicules()` fait le même travail rétroactivement pour les véhicules déjà créés.
 - **Charte graphique** : voir les CSS vars en haut de `index.html` (`--bg`, `--ink`, `--lime`, `--blue`, etc.) — rainbow bar (cyan→purple→green→lime), boutons lime, coins arrondis.
 - **État actuel** : Budget + Tickets + Véhicules fonctionnels et testés localement (aperçu MOCK). QR code Tickets et ajustements de design encore à faire (reportés par l'utilisateur).
 
@@ -90,9 +91,11 @@ Pas besoin de remplir ces onglets à la main : le code s'en charge (`ajouterEven
 1. Colle tout le contenu de `Code_ajouts_vehicules.gs` à la fin de ton `Code.gs`.
 2. Personnalise en haut du bloc :
    - `SS_VEHICULES_ID` → déjà rempli avec l'ID de ton Sheet Véhicules.
+   - `DOSSIER_VEHICULES_ID` → déjà rempli avec l'ID de ton dossier Drive Véhicules.
    - `VILLES_VEHICULES` → remplace par la vraie liste de vos villes Tohmo.
 3. Sauvegarde, puis lance `creerOngletsVehicules()` une fois (voir étape 2 ci-dessus) pour créer les onglets dans le Sheet dédié.
-4. Aucun changement à `doGet()` — Véhicules n'a pas de page publique.
+4. Si tu avais déjà des véhicules créés avant cette mise à jour, lance aussi une fois `synchroniserDossiersDriveVehicules()` pour leur associer rétroactivement leur dossier Drive (créé au passage s'il n'existe pas encore).
+5. Aucun changement à `doGet()` — Véhicules n'a pas de page publique.
 
 ---
 
@@ -114,21 +117,23 @@ Pas besoin de remplir ces onglets à la main : le code s'en charge (`ajouterEven
 - **Tableau filtrable** : par statut, type, ville, plus une recherche libre (immatriculation, conducteur, ville).
 - **Colonnes affichées** : immatriculation, véhicule (marque/modèle/type), ville, conducteur, kilométrage actuel, loyer mensuel, date de fin de contrat, échéance la plus proche (CT/assurance/entretien/fin de contrat, avec code couleur), statut, et un lien direct vers le **dossier Drive dédié** du véhicule (ouvre un nouvel onglet, ne déclenche pas la fiche détail).
 - **Fiche détail (clic sur une ligne)** : tous les champs sont éditables (statut, ville, conducteur, kilométrage, kilométrage contractuel, durée du contrat, loyer, dates d'échéance, lien Drive) avec un bouton **Enregistrer les modifications**, plus un bouton **Supprimer le véhicule** (retrait définitif du parc, avec confirmation), la timeline complète, et l'ajout de commentaires.
-- **+ Nouveau véhicule** : formulaire de création avec les mêmes champs.
+- **+ Nouveau véhicule** : formulaire de création avec les mêmes champs. Le lien Drive est **facultatif** : si tu ne le renseignes pas, le sous-dossier correspondant à l'immatriculation est retrouvé (ou créé s'il n'existe pas) automatiquement dans `DOSSIER_VEHICULES_ID`.
 
 ## 7. Ce que fait chaque fonction serveur (résumé)
 
 | Fonction | Rôle |
 |---|---|
 | `creerOngletsVehicules()` | installation : crée les onglets + garde-fous dans le Sheet dédié (à lancer une fois) |
+| `synchroniserDossiersDriveVehicules()` | rattrapage : relie chaque véhicule sans lien Drive à son sous-dossier (créé si besoin) (à lancer une fois si besoin) |
 | `getVehicules()` | liste tous les véhicules, avec alerte d'échéance calculée |
 | `getVehicule(id)` | un véhicule + sa timeline |
 | `getStatsVehicules()` | chiffres du bandeau stats (dont le loyer total mensuel du parc) |
-| `addVehicule(data)` | ajouter un véhicule au parc |
+| `addVehicule(data)` | ajouter un véhicule au parc (lie/crée son dossier Drive si non fourni) |
 | `majStatutVehicule(id, statut, commentaire)` | changer le statut |
 | `majVehicule(id, updates)` | modifier n'importe quel champ (kilométrage, loyer, dates, conducteur, lien Drive, etc.) |
 | `addCommentaireVehicule(id, texte)` | ajouter une note dans la timeline |
 | `supprimerVehicule(id)` | sortie de parc définitive |
+| `obtenirOuCreerDossierDriveVehicule(immatriculation)` | retrouve ou crée le sous-dossier Drive d'un véhicule, retourne son URL |
 
 Toutes ces fonctions vivent dans `Code.gs` et sont appelées via `google.script.run` depuis `index.html` (section Véhicules).
 

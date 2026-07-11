@@ -7,13 +7,18 @@
  * 3. Colle TOUT le contenu de ce fichier À LA SUITE de ton code existant (à la fin du fichier)
  * 4. Renseigne VILLES_VEHICULES ci-dessous avec ta vraie liste de villes Tohmo
  * 5. Sauvegarde, puis lance UNE FOIS la fonction creerOngletsVehicules() (voir plus bas)
- * 6. N'oublie pas : Déployer > Gérer les déploiements > Nouvelle version (sinon rien ne change en prod)
+ * 6. Si tu avais déjà des véhicules créés avant cette mise à jour, lance aussi UNE FOIS
+ *    synchroniserDossiersDriveVehicules() pour leur associer leur dossier Drive rétroactivement
+ * 7. N'oublie pas : Déployer > Gérer les déploiements > Nouvelle version (sinon rien ne change en prod)
  *
  * Les données vivent dans un Sheet DÉDIÉ et SÉPARÉ (celui que tu as partagé) — même logique que
  * Tickets, pas le Sheet principal du Budget. Ce fichier définit donc ses propres helpers
  * (getSheetVehicules, readSheetVehicules, appendRowVehicules, updateRowByIdVehicules,
  * deleteRowByIdVehicules) qui pointent vers SS_VEHICULES_ID, en plus de réutiliser uid/nowStr/who
  * déjà présents dans ton Code.gs (il ne faut pas les redéfinir).
+ *
+ * Le dossier Drive dédié (DOSSIER_VEHICULES_ID) est géré via DriveApp — la première exécution
+ * demandera d'autoriser le script à accéder à Drive, en plus des deux Sheets.
  */
 
 // ============================================================
@@ -22,6 +27,13 @@
 
 // ID du Sheet dédié Véhicules (celui partagé : https://docs.google.com/spreadsheets/d/19mNkzcSMTwrl5Nx4QzApZDNTQLB2bntWl_76lRVzCYU/edit)
 var SS_VEHICULES_ID = '19mNkzcSMTwrl5Nx4QzApZDNTQLB2bntWl_76lRVzCYU';
+
+// ID du dossier Drive parent qui contient un sous-dossier par véhicule (celui partagé :
+// https://drive.google.com/drive/folders/1QuMgPpvDdO0HZE2cPRznU99rFTTQm7-r).
+// Convention attendue : un sous-dossier par véhicule, nommé d'après son immatriculation
+// (peu importe espaces/tirets/casse — la recherche est tolérante). Si aucun sous-dossier
+// ne correspond, il est créé automatiquement.
+var DOSSIER_VEHICULES_ID = '1QuMgPpvDdO0HZE2cPRznU99rFTTQm7-r';
 
 // Liste des villes Tohmo (mêmes valeurs que pour Tickets si le module est déjà installé)
 var VILLES_VEHICULES = ['Paris', 'Lyon', 'Marseille', 'Bordeaux'];
@@ -240,9 +252,16 @@ function parseDateFrVehicules(s) {
  * data = { immatriculation, marque, modele, type, ville, conducteur_nom, conducteur_email,
  *          kilometrage, km_contrat, duree_contrat_annees, loyer_mensuel, date_fin_contrat,
  *          date_ct, date_assurance, date_entretien, lien_drive }
+ * Si lien_drive n'est pas fourni, le sous-dossier Drive du véhicule (nommé d'après son
+ * immatriculation) est retrouvé ou créé automatiquement dans DOSSIER_VEHICULES_ID.
  */
 function addVehicule(data) {
   var id = uid('VEH');
+  var lienDrive = data.lien_drive || '';
+  if (!lienDrive && data.immatriculation) {
+    try { lienDrive = obtenirOuCreerDossierDriveVehicule(data.immatriculation); }
+    catch (e) { lienDrive = ''; } // dossier parent mal configuré ou inaccessible : on n'échoue pas la création du véhicule pour autant
+  }
   appendRowVehicules('vehicules', {
     id: id,
     immatriculation: data.immatriculation || '',
@@ -261,7 +280,7 @@ function addVehicule(data) {
     date_ct: data.date_ct || '',
     date_assurance: data.date_assurance || '',
     date_entretien: data.date_entretien || '',
-    lien_drive: data.lien_drive || '',
+    lien_drive: lienDrive,
     notes: '',
     cree_le: nowStr(),
     cree_par: who(),
@@ -269,6 +288,50 @@ function addVehicule(data) {
   });
   ajouterEvenementVehicule(id, 'creation', 'Véhicule ajouté au parc', who());
   return id;
+}
+
+// ============================================================
+// DOSSIER DRIVE DÉDIÉ (un sous-dossier par véhicule, dans DOSSIER_VEHICULES_ID)
+// ============================================================
+
+/** Normalise une immatriculation pour la comparaison (enlève espaces/tirets, met en majuscules). */
+function normaliserImmatriculation(s) {
+  return String(s || '').toUpperCase().replace(/[\s-]/g, '');
+}
+
+/**
+ * Retrouve le sous-dossier Drive correspondant à une immatriculation (comparaison tolérante
+ * aux espaces/tirets/casse). Le crée s'il n'existe pas encore. Retourne l'URL du dossier.
+ */
+function obtenirOuCreerDossierDriveVehicule(immatriculation) {
+  var parent = DriveApp.getFolderById(DOSSIER_VEHICULES_ID);
+  var cible = normaliserImmatriculation(immatriculation);
+  var sousDossiers = parent.getFolders();
+  while (sousDossiers.hasNext()) {
+    var f = sousDossiers.next();
+    if (normaliserImmatriculation(f.getName()) === cible) return f.getUrl();
+  }
+  var nouveau = parent.createFolder(immatriculation);
+  return nouveau.getUrl();
+}
+
+/**
+ * Rattrapage : parcourt tous les véhicules qui n'ont pas encore de lien_drive et leur
+ * associe (ou crée) leur sous-dossier dans DOSSIER_VEHICULES_ID. À lancer depuis l'éditeur
+ * Apps Script si tu avais déjà des véhicules créés avant que cette fonctionnalité existe.
+ */
+function synchroniserDossiersDriveVehicules() {
+  var rows = readSheetVehicules('vehicules');
+  var maj = 0;
+  rows.forEach(function (v) {
+    if (v.lien_drive || !v.immatriculation) return;
+    var lien = obtenirOuCreerDossierDriveVehicule(v.immatriculation);
+    updateRowByIdVehicules('vehicules', v.id, { lien_drive: lien, maj_le: nowStr() });
+    maj++;
+  });
+  var msg = maj + ' véhicule(s) rattaché(s) à leur dossier Drive.';
+  Logger.log(msg);
+  return msg;
 }
 
 /** Change le statut d'un véhicule (En service / En maintenance / Hors service). */

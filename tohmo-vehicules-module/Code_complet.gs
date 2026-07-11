@@ -366,6 +366,7 @@ function getListesTickets() {
 // ============================================================
 
 var SS_VEHICULES_ID = '19mNkzcSMTwrl5Nx4QzApZDNTQLB2bntWl_76lRVzCYU';
+var DOSSIER_VEHICULES_ID = '1QuMgPpvDdO0HZE2cPRznU99rFTTQm7-r'; // dossier Drive parent, un sous-dossier par véhicule (nommé d'après l'immatriculation)
 var VILLES_VEHICULES = ['Paris', 'Lyon', 'Marseille', 'Bordeaux']; // <- à adapter à vos vraies villes Tohmo
 var VEHICULE_TYPES   = ['citadine', 'berline', 'utilitaire', 'suv', 'autre'];
 var VEHICULE_STATUTS = ['En service', 'En maintenance', 'Hors service'];
@@ -541,6 +542,11 @@ function parseDateFrVehicules(s) {
 
 function addVehicule(data) {
   var id = uid('VEH');
+  var lienDrive = data.lien_drive || '';
+  if (!lienDrive && data.immatriculation) {
+    try { lienDrive = obtenirOuCreerDossierDriveVehicule(data.immatriculation); }
+    catch (e) { lienDrive = ''; }
+  }
   appendRowVehicules('vehicules', {
     id: id,
     immatriculation: data.immatriculation || '',
@@ -559,7 +565,7 @@ function addVehicule(data) {
     date_ct: data.date_ct || '',
     date_assurance: data.date_assurance || '',
     date_entretien: data.date_entretien || '',
-    lien_drive: data.lien_drive || '',
+    lien_drive: lienDrive,
     notes: '',
     cree_le: nowStr(),
     cree_par: who(),
@@ -567,6 +573,36 @@ function addVehicule(data) {
   });
   ajouterEvenementVehicule(id, 'creation', 'Véhicule ajouté au parc', who());
   return id;
+}
+
+function normaliserImmatriculation(s) {
+  return String(s || '').toUpperCase().replace(/[\s-]/g, '');
+}
+
+function obtenirOuCreerDossierDriveVehicule(immatriculation) {
+  var parent = DriveApp.getFolderById(DOSSIER_VEHICULES_ID);
+  var cible = normaliserImmatriculation(immatriculation);
+  var sousDossiers = parent.getFolders();
+  while (sousDossiers.hasNext()) {
+    var f = sousDossiers.next();
+    if (normaliserImmatriculation(f.getName()) === cible) return f.getUrl();
+  }
+  var nouveau = parent.createFolder(immatriculation);
+  return nouveau.getUrl();
+}
+
+function synchroniserDossiersDriveVehicules() {
+  var rows = readSheetVehicules('vehicules');
+  var maj = 0;
+  rows.forEach(function (v) {
+    if (v.lien_drive || !v.immatriculation) return;
+    var lien = obtenirOuCreerDossierDriveVehicule(v.immatriculation);
+    updateRowByIdVehicules('vehicules', v.id, { lien_drive: lien, maj_le: nowStr() });
+    maj++;
+  });
+  var msg = maj + ' véhicule(s) rattaché(s) à leur dossier Drive.';
+  Logger.log(msg);
+  return msg;
 }
 
 function majStatutVehicule(id, statut, commentaire) {
