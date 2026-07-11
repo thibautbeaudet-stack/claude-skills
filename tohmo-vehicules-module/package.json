@@ -1,0 +1,11 @@
+{
+  "name": "tohmo-vehicules-module",
+  "private": true,
+  "description": "Tests + déploiement Apps Script du module Véhicules du Tohmo Office Hub",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
