@@ -27,7 +27,11 @@ Tickets a besoin d'un Sheet séparé parce qu'un formulaire public (QR code, san
 
 ## 2. Étape 1 — Créer les onglets dans le Sheet principal ("Suivi Tohmo Hub")
 
-Crée deux nouveaux onglets dans le **même Sheet que le Budget** (pas dans le Sheet Tickets séparé).
+**Option automatique (recommandée)** : une fois `Code_ajouts_vehicules.gs` collé dans `Code.gs` (étape 3 ci-dessous), lance la fonction `creerOngletsVehicules()` une seule fois depuis l'éditeur Apps Script — elle crée les deux onglets, les en-têtes et les garde-fous (listes déroulantes) toute seule dans le **même Sheet que le Budget** (pas le Sheet Tickets séparé). Sûr à relancer plusieurs fois si besoin.
+
+Comment lancer une fonction depuis l'éditeur Apps Script : ouvre le projet (script.google.com), sélectionne `creerOngletsVehicules` dans le menu déroulant en haut de l'éditeur, clique sur ▶ Exécuter. La première fois, Google demande d'autoriser l'accès au Sheet : accepte.
+
+Le reste de cette section décrit ce que la fonction crée, si tu préfères vérifier ou créer les onglets à la main.
 
 ### Onglet `vehicules`
 
@@ -80,7 +84,8 @@ Pas besoin de remplir ces onglets à la main : le code s'en charge (`ajouterEven
 1. Colle tout le contenu de `Code_ajouts_vehicules.gs` à la fin de ton `Code.gs`.
 2. Personnalise en haut du bloc :
    - `SITES_VEHICULES` → remplace par la vraie liste de vos sites Tohmo (même liste que `SITES_TICKETS`).
-3. Aucun changement à `doGet()` — Véhicules n'a pas de page publique.
+3. Sauvegarde, puis lance `creerOngletsVehicules()` une fois (voir étape 2 ci-dessus) pour créer les onglets.
+4. Aucun changement à `doGet()` — Véhicules n'a pas de page publique.
 
 ---
 
@@ -101,6 +106,7 @@ Pas besoin de remplir ces onglets à la main : le code s'en charge (`ajouterEven
 
 | Fonction | Rôle |
 |---|---|
+| `creerOngletsVehicules()` | installation : crée les onglets + garde-fous (à lancer une fois) |
 | `getVehicules()` | liste tous les véhicules, avec alerte d'échéance calculée |
 | `getVehicule(id)` | un véhicule + sa timeline |
 | `getStatsVehicules()` | chiffres du bandeau stats |

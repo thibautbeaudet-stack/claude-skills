@@ -370,6 +370,46 @@ var VEHICULE_TYPES   = ['citadine', 'berline', 'utilitaire', 'suv', 'autre'];
 var VEHICULE_STATUTS = ['En service', 'En maintenance', 'Hors service'];
 var VEHICULE_SEUIL_ALERTE_JOURS = 30;
 
+var VEHICULES_ENTETES = ['id','immatriculation','marque','modele','type','statut','site','conducteur_nom','conducteur_email','kilometrage','date_ct','date_assurance','date_entretien','notes','cree_le','cree_par','maj_le'];
+var VEHICULES_HISTORIQUE_ENTETES = ['id','vehicule_id','type_evenement','contenu','auteur','cree_le'];
+
+/**
+ * Crée les onglets "vehicules" et "vehicules_historique" avec en-têtes + garde-fous.
+ * À lancer une seule fois depuis l'éditeur Apps Script (sélectionner cette fonction puis ▶ Exécuter).
+ * Sûr à relancer plusieurs fois : ne recrée pas les onglets s'ils existent déjà.
+ */
+function creerOngletsVehicules() {
+  var creees = [];
+
+  var shVeh = SS.getSheetByName('vehicules');
+  if (!shVeh) {
+    shVeh = SS.insertSheet('vehicules');
+    shVeh.getRange(1, 1, 1, VEHICULES_ENTETES.length).setValues([VEHICULES_ENTETES]).setFontWeight('bold');
+    shVeh.setFrozenRows(1);
+    creees.push('vehicules');
+  }
+
+  var shHist = SS.getSheetByName('vehicules_historique');
+  if (!shHist) {
+    shHist = SS.insertSheet('vehicules_historique');
+    shHist.getRange(1, 1, 1, VEHICULES_HISTORIQUE_ENTETES.length).setValues([VEHICULES_HISTORIQUE_ENTETES]).setFontWeight('bold');
+    shHist.setFrozenRows(1);
+    creees.push('vehicules_historique');
+  }
+
+  function dv(list) { return SpreadsheetApp.newDataValidation().requireValueInList(list, true).setAllowInvalid(false).build(); }
+  var rows = Math.max(shVeh.getMaxRows() - 1, 200);
+  shVeh.getRange(2, VEHICULES_ENTETES.indexOf('type') + 1, rows, 1).setDataValidation(dv(VEHICULE_TYPES));
+  shVeh.getRange(2, VEHICULES_ENTETES.indexOf('statut') + 1, rows, 1).setDataValidation(dv(VEHICULE_STATUTS));
+  shVeh.getRange(2, VEHICULES_ENTETES.indexOf('site') + 1, rows, 1).setDataValidation(dv(SITES_VEHICULES));
+
+  var msg = creees.length
+    ? 'Onglets créés : ' + creees.join(', ') + '. Garde-fous (type/statut/site) posés.'
+    : 'Les onglets existaient déjà — garde-fous (type/statut/site) réappliqués.';
+  Logger.log(msg);
+  return msg;
+}
+
 function getVehicules() {
   var rows = readSheet('vehicules');
   rows.forEach(function (v) { v.alerte = calculerAlerteVehicule(v); });
