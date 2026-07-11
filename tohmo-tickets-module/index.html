@@ -14,18 +14,21 @@
   body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);font-size:14px;-webkit-font-smoothing:antialiased;}
   .rainbow{height:4px;background:linear-gradient(90deg,#24D7FF,#B86FF0,#A1FF71,#DFFF36);}
 
-  /* ── Sidebar (commune à tous les modules) ── */
+  /* ── Shell / Sidebar ── */
   .shell{display:flex;align-items:stretch;min-height:calc(100vh - 4px);}
   .sidebar{width:64px;flex:0 0 64px;background:var(--bg);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:6px;}
-  .sidebar .logo{width:34px;height:34px;border-radius:10px;background:var(--lime);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;}
-  .sidebar a,.sidebar .icon-btn{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;text-decoration:none;color:var(--soft);cursor:pointer;flex-shrink:0;}
-  .sidebar a:hover{background:var(--inset);}
-  .sidebar a.active{background:var(--ink);color:#fff;}
-  .sidebar .icon-btn.disabled{opacity:.32;cursor:default;}
+  .sidebar .logo{width:34px;height:34px;border-radius:10px;background:var(--lime);display:flex;align-items:center;justify-content:center;margin-bottom:12px;flex-shrink:0;}
+  .nav-icon,.icon-btn{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--soft);cursor:pointer;flex-shrink:0;font-family:inherit;}
+  .nav-icon:hover{background:var(--inset);}
+  .nav-icon.on{background:var(--ink);color:#fff;}
+  .icon-btn.disabled{opacity:.32;cursor:default;}
   .sidebar .spacer{flex:1;}
   .sidebar .avatar{width:32px;height:32px;border-radius:50%;background:var(--pt);color:var(--pi);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:6px;flex-shrink:0;}
   .content{flex:1;min-width:0;}
+  .module{display:none;}
+  .module.on{display:block;}
 
+  /* ── Module Budget (inchangé) ── */
   .wrap{max-width:900px;margin:0 auto;padding:20px 20px 70px;}
   .head{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
   .mk{width:34px;height:34px;border-radius:10px;background:var(--lime);display:flex;align-items:center;justify-content:center;font-size:19px;}
@@ -57,7 +60,7 @@
   label{display:block;font-size:12px;font-weight:700;color:var(--soft);margin-bottom:5px;}
   input,select{width:100%;padding:11px;border:1.5px solid var(--line);border-radius:10px;font-family:inherit;font-size:14px;color:var(--ink);background:var(--bg);outline:none;}
   input[type=file]{padding:9px;font-size:13px;}
-  input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--bt);}
+  input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--bt);}
   .search{margin-bottom:12px;}
   .calc{grid-column:1/3;font-size:12px;color:var(--mute);}
   .btn{grid-column:1/3;height:44px;border:none;border-radius:12px;background:var(--lime);color:var(--ink);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
@@ -98,152 +101,290 @@
   table.m thead th{color:var(--mute);font-weight:500;text-transform:uppercase;letter-spacing:.03em;font-size:11px;}
   table.m tr.tot td{font-weight:700;border-top:1.5px solid var(--line2);}
   table.m td.z{color:var(--line2);}
-  #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:13px;font-weight:500;padding:11px 18px;border-radius:22px;opacity:0;transition:.25s;pointer-events:none;z-index:9;}
+  #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:13px;font-weight:500;padding:11px 18px;border-radius:22px;opacity:0;transition:.25s;pointer-events:none;z-index:99;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  @media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr);}.form{grid-template-columns:1fr;}.full{grid-column:auto;}.btn,.btn-cancel{grid-column:auto;}.calc{grid-column:auto;}.sidebar{width:52px;flex-basis:52px;}}
+
+  /* ── Module Tickets (préfixe t- pour ne jamais entrer en conflit avec le Budget) ── */
+  .t-wrap{max-width:1100px;margin:0 auto;padding:20px 20px 70px;}
+  .t-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+  .t-header h1{display:flex;align-items:center;gap:10px;}
+  .t-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+  .t-toolbar select{width:auto;min-width:150px;}
+  .t-toolbar input[type=text]{flex:1;min-width:200px;}
+  .t-table{width:100%;border-collapse:collapse;background:var(--bg);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .t-table thead th{text-align:left;font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.03em;padding:10px 14px;background:var(--inset);border-bottom:1px solid var(--line);font-weight:700;}
+  .t-table tbody td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top;}
+  .t-table tbody tr:last-child td{border-bottom:none;}
+  .t-table tbody tr{cursor:pointer;}
+  .t-table tbody tr:hover{background:var(--inset);}
+  .t-src{font-size:11px;color:var(--mute);}
+  .t-to-validate{background:var(--at);color:var(--ai);border-radius:6px;padding:1px 6px;font-size:11px;margin-left:6px;}
+  .t-overlay{position:fixed;inset:0;background:rgba(17,17,16,.35);display:none;align-items:stretch;justify-content:flex-end;z-index:50;}
+  .t-overlay.open{display:flex;}
+  .t-drawer{width:480px;max-width:100%;background:var(--bg);height:100%;overflow-y:auto;padding:24px;border-left:1px solid var(--line);}
+  .t-drawer h2{margin:0 0 4px;font-size:18px;}
+  .t-field-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .t-field-row > div{flex:1;min-width:120px;}
+  .t-field-row label{display:block;font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;}
+  .t-box{background:var(--inset);border-radius:10px;padding:12px;font-size:14px;margin-bottom:14px;white-space:pre-wrap;}
+  .t-timeline{border-left:2px solid var(--line2);margin:14px 0 14px 6px;padding-left:16px;}
+  .t-tl-item{margin-bottom:14px;position:relative;}
+  .t-tl-item::before{content:'';position:absolute;left:-21px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--lime);border:2px solid var(--bg);}
+  .t-tl-item .meta{font-size:11px;color:var(--mute);}
+  .t-tl-item .content{font-size:14px;margin-top:2px;}
+  textarea{width:100%;font-family:inherit;font-size:14px;padding:10px;border-radius:10px;border:1.5px solid var(--line);resize:vertical;min-height:70px;outline:none;}
+  .t-close-x{position:absolute;top:18px;right:18px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--soft);}
+  .t-modal-card{background:var(--bg);border-radius:16px;padding:24px;width:480px;max-width:92vw;max-height:88vh;overflow-y:auto;}
+  .t-modal-overlay{position:fixed;inset:0;background:rgba(17,17,16,.35);display:none;align-items:center;justify-content:center;z-index:60;}
+  .t-modal-overlay.open{display:flex;}
+  .t-form-row{margin-bottom:12px;}
+  .t-form-row label{display:block;font-size:12px;color:var(--soft);margin-bottom:5px;}
+  .t-err{color:var(--ri);font-size:13px;margin-top:8px;}
+  .t-btn{font-family:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--lime);background:var(--lime);color:var(--ink);padding:10px 16px;font-size:14px;font-weight:700;}
+  .t-btn:hover{filter:brightness(0.96);}
+  .t-btn-ghost{font-family:inherit;cursor:pointer;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--soft);padding:10px 16px;font-size:14px;}
+  .t-btn-ghost:hover{background:var(--inset);}
+
+  @media(max-width:560px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .form{grid-template-columns:1fr;}
+    .full{grid-column:auto;}
+    .btn,.btn-cancel{grid-column:auto;}
+    .calc{grid-column:auto;}
+    .sidebar{width:52px;flex-basis:52px;}
+    .nav-icon,.icon-btn{width:34px;height:34px;}
+  }
 </style>
 </head>
 <body>
 <div class="rainbow"></div>
 <div class="shell">
   <aside class="sidebar">
-    <div class="logo">⚡</div>
-    <div class="icon-btn disabled" title="Tableau de bord — bientôt disponible">▦</div>
-    <div class="icon-btn disabled" title="Tâches — bientôt disponible">📋</div>
-    <a href="https://script.google.com/a/macros/zeplug.com/s/AKfycbxglgtjm7BMsFcHa8jE4a83AMIucZNCUtdXhkcCMgz9hHXK3Fj4fpZsgs3gexRqF74A/exec?page=tickets" title="Tickets">🎫</a>
-    <a href="https://script.google.com/a/macros/zeplug.com/s/AKfycbxglgtjm7BMsFcHa8jE4a83AMIucZNCUtdXhkcCMgz9hHXK3Fj4fpZsgs3gexRqF74A/exec" class="active" title="Budget & achats">💰</a>
-    <div class="icon-btn disabled" title="Cartes — bientôt disponible">💳</div>
-    <div class="icon-btn disabled" title="Calendrier — bientôt disponible">📅</div>
-    <div class="icon-btn disabled" title="Mail — bientôt disponible">✉️</div>
-    <div class="icon-btn disabled" title="Véhicules — bientôt disponible">🚗</div>
-    <div class="icon-btn disabled" title="Téléphonie — bientôt disponible">📱</div>
-    <div class="icon-btn disabled" title="Accès / Badges — bientôt disponible">🔒</div>
-    <div class="icon-btn disabled" title="Bâtiment / Sites — bientôt disponible">🏢</div>
-    <div class="icon-btn disabled" title="Assurances — bientôt disponible">🛡️</div>
-    <div class="icon-btn disabled" title="Stock / Matériel — bientôt disponible">📦</div>
-    <div class="icon-btn disabled" title="Annuaire — bientôt disponible">👥</div>
-    <div class="icon-btn disabled" title="Checklist — bientôt disponible">✔️</div>
+    <div class="logo" title="Tohmo Hub">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--ink)" stroke="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+    </div>
+
+    <button class="icon-btn disabled" type="button" disabled title="Tableau de bord — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Tâches — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="4" height="4" rx="1"/><path d="M10 6h11"/><rect x="3" y="10" width="4" height="4" rx="1"/><path d="M10 12h11"/><rect x="3" y="16" width="4" height="4" rx="1"/><path d="M10 18h11"/></svg>
+    </button>
+    <button class="nav-icon" type="button" data-section="tickets" title="Tickets">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M9 6v12" stroke-dasharray="2 2.4"/></svg>
+    </button>
+    <button class="nav-icon" type="button" data-section="budget" title="Budget & achats">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2h-3a2 2 0 1 0 0 4h3v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><circle cx="17" cy="13" r="0.9" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Cartes — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Calendrier — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Mail — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M3 6l9 7 9-7"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Véhicules — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-3l2-5a2 2 0 0 1 2-1h8a2 2 0 0 1 2 1l2 5v3"/><path d="M4 16h16"/><circle cx="7.5" cy="16.5" r="1.5"/><circle cx="16.5" cy="16.5" r="1.5"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Téléphonie — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Accès / Badges — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Bâtiment / Sites — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h1M12 7h1M16 7h1M8 11h1M12 11h1M16 11h1M8 15h1M12 15h1M16 15h1"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Assurances — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Stock / Matériel — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Annuaire — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 20a5 5 0 0 1 6.5-4.8"/></svg>
+    </button>
+    <button class="icon-btn disabled" type="button" disabled title="Checklist — bientôt disponible">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 12l2 2 4-4"/></svg>
+    </button>
+
     <div class="spacer"></div>
     <div class="avatar">TB</div>
   </aside>
+
   <div class="content">
-  <div class="wrap">
-  <div class="head">
-    <div class="mk">⚡</div>
-    <div><h1>Tohmo — Budget &amp; achats</h1><div class="sub">Données en direct depuis « Suivi Tohmo Hub » · suivi en HT</div></div>
-    <div class="yearbox"><label>Année</label><select id="year"></select></div>
-  </div>
-  <div class="nav">
-    <button data-v="budget" class="on">Budget</button>
-    <button data-v="mensuel">Mensuel</button>
-    <button data-v="cartes">Cartes</button>
-    <button data-v="factures">Factures</button>
-    <button data-v="po">Suivi PO</button>
-    <button data-v="frn">Fournisseurs</button>
-  </div>
-  <div class="msg err" id="err"></div>
 
-  <div class="view on" data-view="budget">
-    <div class="stats">
-      <div class="stat"><div class="stat-l">Budget annuel (HT)</div><div class="stat-v" id="b-bud">—</div></div>
-      <div class="stat"><div class="stat-l">Consommé (HT)</div><div class="stat-v" id="b-cons">—</div></div>
-      <div class="stat"><div class="stat-l">Restant (HT)</div><div class="stat-v" id="b-rest" style="color:var(--gi)">—</div></div>
-      <div class="stat"><div class="stat-l">TVA récupérable</div><div class="stat-v" id="b-tva">—</div></div>
-    </div>
-    <div class="card"><div class="card-h">Suivi par poste (HT) — cartes + factures</div><div id="b-postes"><div class="muted">Chargement…</div></div></div>
-  </div>
+    <!-- ================= MODULE TICKETS ================= -->
+    <section id="section-tickets" class="module">
+      <div class="t-wrap">
+        <div class="t-header">
+          <h1>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M9 6v12" stroke-dasharray="2 2.4"/></svg>
+            Tickets
+          </h1>
+          <button class="t-btn" type="button" onclick="Tickets.ouvrirModalNouveau()">+ Nouveau ticket</button>
+        </div>
 
-  <div class="view" data-view="mensuel">
-    <div class="card"><div class="card-h">Dépenses par poste et par mois (HT) — <span id="m-year"></span></div><div class="tbl-wrap"><table class="m" id="m-tbl"></table></div></div>
-  </div>
+        <div class="stats" id="t-stats"></div>
 
-  <div class="view" data-view="cartes">
-    <div class="msg info">Les paiements par carte servent uniquement au suivi du budget (pas de PO).</div>
-    <div class="card">
-      <div class="editing-banner" id="c-edit-banner">✎ Modification en cours</div>
-      <div class="card-h" id="c-form-title">Enregistrer un paiement carte</div>
-      <div class="form">
-        <div><label>Montant TTC (€)</label><input id="c-ttc" type="number" min="0" step="0.01" placeholder="0,00"></div>
-        <div><label>Taux de TVA</label><select id="c-tva"><option value="20">20 %</option><option value="10">10 %</option><option value="5.5">5,5 %</option><option value="2.1">2,1 %</option><option value="0">0 %</option></select></div>
-        <div class="calc" id="c-calc">HT — · TVA —</div>
-        <div><label>Fournisseur</label><input id="c-four" list="frn-list" placeholder="Rechercher / saisir"></div>
-        <div><label>Type de dépense</label><select id="c-poste"></select></div>
-        <div><label>Moyen de paiement</label><select id="c-moyen"><option>Carte unique</option><option>CB physique</option></select></div>
-        <div><label>Libellé</label><input id="c-lib" placeholder="Ex : abonnement logiciel"></div>
-        <button class="btn" id="c-add">Enregistrer le paiement</button>
-        <button class="btn-cancel" id="c-cancel" style="display:none;">Annuler la modification</button>
+        <div class="t-toolbar">
+          <select id="t-fStatut" onchange="Tickets.render()">
+            <option value="">Tous les statuts</option>
+            <option>Nouveau</option><option>En cours</option><option>Résolu</option><option>Fermé</option>
+          </select>
+          <select id="t-fType" onchange="Tickets.render()">
+            <option value="">Tous les types</option>
+            <option value="badge">Badge</option>
+            <option value="courrier">Courrier</option>
+            <option value="panne_casse">Panne / Casse</option>
+            <option value="casier">Casier</option>
+            <option value="proprete">Propreté</option>
+            <option value="autre">Autre</option>
+          </select>
+          <input type="text" id="t-fRecherche" placeholder="Rechercher (objet, nom, description...)" oninput="Tickets.render()">
+        </div>
+
+        <div class="tbl-wrap">
+          <table class="t-table">
+            <thead><tr><th>ID</th><th>Type</th><th>Objet</th><th>Demandeur</th><th>Priorité</th><th>Statut</th><th>Créé le</th></tr></thead>
+            <tbody id="t-tbody"></tbody>
+          </table>
+        </div>
       </div>
-    </div>
-    <div class="card"><div class="card-h">Paiements carte enregistrés</div><input class="search" id="c-search" placeholder="Rechercher (fournisseur, poste, libellé)…"><div id="c-list"><div class="muted">Chargement…</div></div></div>
-  </div>
 
-  <div class="view" data-view="factures">
-    <div class="msg info">Les factures sont liées à un PO. Dépose le PDF/scan : il est rangé automatiquement dans le Drive.</div>
-    <div class="card">
-      <div class="editing-banner" id="fa-edit-banner">✎ Modification en cours</div>
-      <div class="card-h" id="fa-form-title">Enregistrer une facture</div>
-      <div class="form">
-        <div><label>N° de facture</label><input id="fa-num" placeholder="Ex : F2026-0148"></div>
-        <div><label>Fournisseur</label><input id="fa-four" list="frn-list" placeholder="Rechercher / saisir"></div>
-        <div><label>Montant TTC (€)</label><input id="fa-ttc" type="number" min="0" step="0.01" placeholder="0,00"></div>
-        <div><label>Taux de TVA</label><select id="fa-tva"><option value="20">20 %</option><option value="10">10 %</option><option value="5.5">5,5 %</option><option value="2.1">2,1 %</option><option value="0">0 %</option></select></div>
-        <div class="calc" id="fa-calc">HT — · TVA —</div>
-        <div><label>Rattacher au PO</label><select id="fa-po"></select></div>
-        <div><label>Type de dépense</label><select id="fa-poste"></select></div>
-        <div><label>Date de facturation</label><input id="fa-date" placeholder="jj/mm/aaaa"></div>
-        <div><label>Statut</label><select id="fa-statut"><option>À payer</option><option>Payée</option></select></div>
-        <div class="full"><label>Déposer la facture (PDF ou image, facultatif)</label><input type="file" id="fa-file" accept="application/pdf,image/*"></div>
-        <button class="btn" id="fa-add">Enregistrer la facture</button>
-        <button class="btn-cancel" id="fa-cancel" style="display:none;">Annuler la modification</button>
+      <div class="t-overlay" id="t-drawerOverlay" onclick="if(event.target===this) Tickets.fermerDrawer()">
+        <div class="t-drawer" id="t-drawer"></div>
       </div>
-    </div>
-    <div class="card"><div class="card-h">Factures enregistrées</div><input class="search" id="fa-search" placeholder="Rechercher (fournisseur, n° facture, poste, PO)…"><div id="fa-list"><div class="muted">Chargement…</div></div></div>
-  </div>
+      <div class="t-modal-overlay" id="t-modalOverlay" onclick="if(event.target===this) Tickets.fermerModalNouveau()">
+        <div class="t-modal-card" id="t-modalNouveau"></div>
+      </div>
+    </section>
 
-  <div class="view" data-view="po">
-    <div class="stats">
-      <div class="stat"><div class="stat-l">PR en cours</div><div class="stat-v" id="p-pr" style="color:var(--pi)">—</div></div>
-      <div class="stat"><div class="stat-l">PO ouverts</div><div class="stat-v" id="p-open">—</div></div>
-      <div class="stat"><div class="stat-l">Engagé (HT)</div><div class="stat-v" id="p-eng">—</div></div>
-      <div class="stat"><div class="stat-l">Reste sur PO (HT)</div><div class="stat-v" id="p-rest" style="color:var(--gi)">—</div></div>
-    </div>
-    <div class="card">
-      <div class="editing-banner" id="pr-edit-banner">✎ Modification en cours</div>
-      <div class="card-h" id="pr-form-title">Créer une demande d'achat (PR)</div>
-      <div class="form">
-        <div><label>N° de PR</label><input id="pr-num" placeholder="Ex : PR-0042"></div>
-        <div><label>Montant engagé HT (€)</label><input id="pr-mt" type="number" min="0" step="0.01" placeholder="0,00"></div>
-        <div><label>Fournisseur</label><input id="pr-four" list="frn-list" placeholder="Rechercher / saisir"></div>
-        <div><label>Poste budgétaire</label><select id="pr-poste"></select></div>
-        <div><label>Année</label><input id="pr-annee" value="2026"></div>
-        <div><label>Objet</label><input id="pr-objet" placeholder="Ex : postes informatiques"></div>
-        <button class="btn" id="pr-add">Créer la PR</button>
-        <button class="btn-cancel" id="pr-cancel" style="display:none;">Annuler la modification</button>
-      </div>
-    </div>
-    <div class="card"><div class="card-h">Demandes d'achat (PR) en cours</div><div id="pr-list"><div class="muted">Chargement…</div></div></div>
-    <div class="card"><div class="card-h">Bons de commande (PO) — engagé / consommé / reste</div><div id="po-list"><div class="muted">Chargement…</div></div></div>
-  </div>
+    <!-- ================= MODULE BUDGET ================= -->
+    <section id="section-budget" class="module on">
+      <div class="wrap">
+        <div class="head">
+          <div class="mk">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="var(--ink)" stroke="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          </div>
+          <div><h1>Tohmo — Budget &amp; achats</h1><div class="sub">Données en direct depuis « Suivi Tohmo Hub » · suivi en HT</div></div>
+          <div class="yearbox"><label>Année</label><select id="year"></select></div>
+        </div>
+        <div class="nav">
+          <button data-v="budget" class="on">Budget</button>
+          <button data-v="mensuel">Mensuel</button>
+          <button data-v="cartes">Cartes</button>
+          <button data-v="factures">Factures</button>
+          <button data-v="po">Suivi PO</button>
+          <button data-v="frn">Fournisseurs</button>
+        </div>
+        <div class="msg err" id="err"></div>
 
-  <div class="view" data-view="frn">
-    <div class="card">
-      <div class="editing-banner" id="fr-edit-banner">✎ Modification en cours</div>
-      <div class="card-h" id="fr-form-title">Ajouter un fournisseur</div>
-      <div class="form">
-        <div><label>Nom</label><input id="fr-nom" placeholder="Ex : Dell France"></div>
-        <div><label>N° fournisseur (SAP)</label><input id="fr-num" placeholder="Ex : 100234"></div>
-        <div class="full"><label>Téléphone (facultatif)</label><input id="fr-tel" placeholder="Ex : 01 23 45 67 89"></div>
-        <button class="btn" id="fr-add">Ajouter le fournisseur</button>
-        <button class="btn-cancel" id="fr-cancel" style="display:none;">Annuler la modification</button>
+        <div class="view on" data-view="budget">
+          <div class="stats">
+            <div class="stat"><div class="stat-l">Budget annuel (HT)</div><div class="stat-v" id="b-bud">—</div></div>
+            <div class="stat"><div class="stat-l">Consommé (HT)</div><div class="stat-v" id="b-cons">—</div></div>
+            <div class="stat"><div class="stat-l">Restant (HT)</div><div class="stat-v" id="b-rest" style="color:var(--gi)">—</div></div>
+            <div class="stat"><div class="stat-l">TVA récupérable</div><div class="stat-v" id="b-tva">—</div></div>
+          </div>
+          <div class="card"><div class="card-h">Suivi par poste (HT) — cartes + factures</div><div id="b-postes"><div class="muted">Chargement…</div></div></div>
+        </div>
+
+        <div class="view" data-view="mensuel">
+          <div class="card"><div class="card-h">Dépenses par poste et par mois (HT) — <span id="m-year"></span></div><div class="tbl-wrap"><table class="m" id="m-tbl"></table></div></div>
+        </div>
+
+        <div class="view" data-view="cartes">
+          <div class="msg info">Les paiements par carte servent uniquement au suivi du budget (pas de PO).</div>
+          <div class="card">
+            <div class="editing-banner" id="c-edit-banner">✎ Modification en cours</div>
+            <div class="card-h" id="c-form-title">Enregistrer un paiement carte</div>
+            <div class="form">
+              <div><label>Montant TTC (€)</label><input id="c-ttc" type="number" min="0" step="0.01" placeholder="0,00"></div>
+              <div><label>Taux de TVA</label><select id="c-tva"><option value="20">20 %</option><option value="10">10 %</option><option value="5.5">5,5 %</option><option value="2.1">2,1 %</option><option value="0">0 %</option></select></div>
+              <div class="calc" id="c-calc">HT — · TVA —</div>
+              <div><label>Fournisseur</label><input id="c-four" list="frn-list" placeholder="Rechercher / saisir"></div>
+              <div><label>Type de dépense</label><select id="c-poste"></select></div>
+              <div><label>Moyen de paiement</label><select id="c-moyen"><option>Carte unique</option><option>CB physique</option></select></div>
+              <div><label>Libellé</label><input id="c-lib" placeholder="Ex : abonnement logiciel"></div>
+              <button class="btn" id="c-add">Enregistrer le paiement</button>
+              <button class="btn-cancel" id="c-cancel" style="display:none;">Annuler la modification</button>
+            </div>
+          </div>
+          <div class="card"><div class="card-h">Paiements carte enregistrés</div><input class="search" id="c-search" placeholder="Rechercher (fournisseur, poste, libellé)…"><div id="c-list"><div class="muted">Chargement…</div></div></div>
+        </div>
+
+        <div class="view" data-view="factures">
+          <div class="msg info">Les factures sont liées à un PO. Dépose le PDF/scan : il est rangé automatiquement dans le Drive.</div>
+          <div class="card">
+            <div class="editing-banner" id="fa-edit-banner">✎ Modification en cours</div>
+            <div class="card-h" id="fa-form-title">Enregistrer une facture</div>
+            <div class="form">
+              <div><label>N° de facture</label><input id="fa-num" placeholder="Ex : F2026-0148"></div>
+              <div><label>Fournisseur</label><input id="fa-four" list="frn-list" placeholder="Rechercher / saisir"></div>
+              <div><label>Montant TTC (€)</label><input id="fa-ttc" type="number" min="0" step="0.01" placeholder="0,00"></div>
+              <div><label>Taux de TVA</label><select id="fa-tva"><option value="20">20 %</option><option value="10">10 %</option><option value="5.5">5,5 %</option><option value="2.1">2,1 %</option><option value="0">0 %</option></select></div>
+              <div class="calc" id="fa-calc">HT — · TVA —</div>
+              <div><label>Rattacher au PO</label><select id="fa-po"></select></div>
+              <div><label>Type de dépense</label><select id="fa-poste"></select></div>
+              <div><label>Date de facturation</label><input id="fa-date" placeholder="jj/mm/aaaa"></div>
+              <div><label>Statut</label><select id="fa-statut"><option>À payer</option><option>Payée</option></select></div>
+              <div class="full"><label>Déposer la facture (PDF ou image, facultatif)</label><input type="file" id="fa-file" accept="application/pdf,image/*"></div>
+              <button class="btn" id="fa-add">Enregistrer la facture</button>
+              <button class="btn-cancel" id="fa-cancel" style="display:none;">Annuler la modification</button>
+            </div>
+          </div>
+          <div class="card"><div class="card-h">Factures enregistrées</div><input class="search" id="fa-search" placeholder="Rechercher (fournisseur, n° facture, poste, PO)…"><div id="fa-list"><div class="muted">Chargement…</div></div></div>
+        </div>
+
+        <div class="view" data-view="po">
+          <div class="stats">
+            <div class="stat"><div class="stat-l">PR en cours</div><div class="stat-v" id="p-pr" style="color:var(--pi)">—</div></div>
+            <div class="stat"><div class="stat-l">PO ouverts</div><div class="stat-v" id="p-open">—</div></div>
+            <div class="stat"><div class="stat-l">Engagé (HT)</div><div class="stat-v" id="p-eng">—</div></div>
+            <div class="stat"><div class="stat-l">Reste sur PO (HT)</div><div class="stat-v" id="p-rest" style="color:var(--gi)">—</div></div>
+          </div>
+          <div class="card">
+            <div class="editing-banner" id="pr-edit-banner">✎ Modification en cours</div>
+            <div class="card-h" id="pr-form-title">Créer une demande d'achat (PR)</div>
+            <div class="form">
+              <div><label>N° de PR</label><input id="pr-num" placeholder="Ex : PR-0042"></div>
+              <div><label>Montant engagé HT (€)</label><input id="pr-mt" type="number" min="0" step="0.01" placeholder="0,00"></div>
+              <div><label>Fournisseur</label><input id="pr-four" list="frn-list" placeholder="Rechercher / saisir"></div>
+              <div><label>Poste budgétaire</label><select id="pr-poste"></select></div>
+              <div><label>Année</label><input id="pr-annee" value="2026"></div>
+              <div><label>Objet</label><input id="pr-objet" placeholder="Ex : postes informatiques"></div>
+              <button class="btn" id="pr-add">Créer la PR</button>
+              <button class="btn-cancel" id="pr-cancel" style="display:none;">Annuler la modification</button>
+            </div>
+          </div>
+          <div class="card"><div class="card-h">Demandes d'achat (PR) en cours</div><div id="pr-list"><div class="muted">Chargement…</div></div></div>
+          <div class="card"><div class="card-h">Bons de commande (PO) — engagé / consommé / reste</div><div id="po-list"><div class="muted">Chargement…</div></div></div>
+        </div>
+
+        <div class="view" data-view="frn">
+          <div class="card">
+            <div class="editing-banner" id="fr-edit-banner">✎ Modification en cours</div>
+            <div class="card-h" id="fr-form-title">Ajouter un fournisseur</div>
+            <div class="form">
+              <div><label>Nom</label><input id="fr-nom" placeholder="Ex : Dell France"></div>
+              <div><label>N° fournisseur (SAP)</label><input id="fr-num" placeholder="Ex : 100234"></div>
+              <div class="full"><label>Téléphone (facultatif)</label><input id="fr-tel" placeholder="Ex : 01 23 45 67 89"></div>
+              <button class="btn" id="fr-add">Ajouter le fournisseur</button>
+              <button class="btn-cancel" id="fr-cancel" style="display:none;">Annuler la modification</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h">Fournisseurs</div>
+            <input class="search" id="fr-search" placeholder="Rechercher un fournisseur…">
+            <div id="fr-list"><div class="muted">Chargement…</div></div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="card-h">Fournisseurs</div>
-      <input class="search" id="fr-search" placeholder="Rechercher un fournisseur…">
-      <div id="fr-list"><div class="muted">Chargement…</div></div>
-    </div>
-  </div>
-  </div>
+    </section>
+
   </div>
 </div>
 
@@ -251,6 +392,22 @@
 <div id="toast"></div>
 
 <script>
+  // ============================================================
+  // NAVIGATION SIDEBAR (bascule entre modules, sans rechargement)
+  // ============================================================
+  Array.prototype.forEach.call(document.querySelectorAll('.nav-icon'), function(b){
+    b.addEventListener('click', function(){
+      var section = b.getAttribute('data-section');
+      Array.prototype.forEach.call(document.querySelectorAll('.nav-icon'), function(x){ x.classList.toggle('on', x===b); });
+      Array.prototype.forEach.call(document.querySelectorAll('.module'), function(m){ m.classList.toggle('on', m.id === 'section-' + section); });
+      window.scrollTo(0,0);
+    });
+  });
+  document.querySelector('.nav-icon[data-section="budget"]').classList.add('on');
+
+  // ============================================================
+  // MODULE BUDGET (code original, inchangé)
+  // ============================================================
   var SR = (typeof google!=='undefined' && google.script && google.script.run);
   var MOCK = {
     postes:[['P1','Loyer et charges',30000,'2026'],['P2','Fournitures et matériel',14000,'2026'],['P3','Événements et convivialité',12000,'2026'],['P4','Maintenance',10000,'2026'],['P5','Divers',18000,'2026'],['P6','Loyer et charges',31000,'2027']].map(function(p){return {id:p[0],poste:p[1],budget_annuel:p[2],annee:p[3]};}),
@@ -259,7 +416,13 @@
     factures:[{id:'FAC-1',numero_facture:'F2026-0101',fournisseur:'EDF',numero_po:'4500000100',poste:'Loyer et charges',montant_ttc:400,taux_tva:20,montant_ht:333.33,montant_tva:66.67,date_facturation:'05/03/2026',statut_paiement:'Payée',scan_url:'https://drive.google.com/x',source:'make'}],
     commandes:[{id:'CMD-1',numero_pr:'PR-0001',numero_po:'4500000100',objet:'PO loyer',fournisseur:'SCI',poste:'Loyer et charges',annee:'2026',montant_engage_ht:1000,statut:'PO émis'},
                {id:'CMD-2',numero_pr:'PR-0002',numero_po:'',objet:'PC',fournisseur:'Dell',poste:'Fournitures et matériel',annee:'2026',montant_engage_ht:5000,statut:'PR en cours'}],
-    frn:[{id:'FRN-1',numero_fournisseur:'100234',nom:'Dell France',telephone:''},{id:'FRN-2',numero_fournisseur:'100567',nom:'LDLC',telephone:''}]
+    frn:[{id:'FRN-1',numero_fournisseur:'100234',nom:'Dell France',telephone:''},{id:'FRN-2',numero_fournisseur:'100567',nom:'LDLC',telephone:''}],
+    tickets:[
+      { id:'TIK-20260710-482', type:'badge', statut:'Nouveau', priorite:'Normale', objet:'Badge accès site Lyon', description:'Nouvelle arrivée, besoin d\'un badge.', demandeur_nom:'Julie Martin', demandeur_email:'julie.martin@tohmo.fr', site:'Lyon', localisation:'', donnees_specifiques:'{"motif":"Nouvelle arrivée"}', date_resolution:'', source:'qr', statut_validation:'a_valider', cree_le:'10/07/2026 09:12', cree_par:'julie.martin@tohmo.fr' },
+      { id:'TIK-20260709-113', type:'panne_casse', statut:'En cours', priorite:'Haute', objet:'Écran cassé salle réunion', description:'L\'écran de la salle Zeplug ne s\'allume plus.', demandeur_nom:'Marc Petit', demandeur_email:'marc.petit@tohmo.fr', site:'Paris', localisation:'Salle Zeplug, 3e étage', donnees_specifiques:'{}', date_resolution:'', source:'qr', statut_validation:'valide', cree_le:'09/07/2026 14:03', cree_par:'marc.petit@tohmo.fr' },
+      { id:'TIK-20260705-901', type:'courrier', statut:'Résolu', priorite:'Normale', objet:'Courrier pour URSSAF', description:'', demandeur_nom:'Sarah Dupont', demandeur_email:'sarah.dupont@tohmo.fr', site:'Paris', localisation:'', donnees_specifiques:'{"destinataire":"URSSAF","type_envoi":"Recommandé"}', date_resolution:'06/07/2026 10:00', source:'hub', statut_validation:'valide', cree_le:'05/07/2026 11:00', cree_par:'office@tohmo.fr' }
+    ],
+    ticketsHist:{}
   };
   var POSTES=[],CARTES=[],FACTURES=[],CMD=[],FRN=[],curYear='2026',toastT;
   var MONTHS=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
@@ -273,14 +436,38 @@
   function esc(s){return String(s==null?'':s).replace(/"/g,'&quot;');}
   function yearOf(d){var m=String(d||'').match(/\d{4}/);return m?m[0]:'';}
   function monthOf(d){var p=String(d||'').split('/');return p.length>=2?parseInt(p[1],10):0;}
+
+  // srv() est partagé par les deux modules : un seul pont vers Code.gs / MOCK
   function srv(fn,args,cb){
     if(SR){var r=google.script.run.withSuccessHandler(cb).withFailureHandler(function(e){showErr(e.message);});r[fn].apply(r,args||[]);}
     else{var a=args||[];
-      if(fn==='getPostes')cb(MOCK.postes);else if(fn==='getCartes')cb(MOCK.cartes);else if(fn==='getFactures')cb(MOCK.factures);
-      else if(fn==='getCommandes')cb(MOCK.commandes);else if(fn==='getFournisseurs')cb(MOCK.frn);
+      if(fn==='getPostes')cb(MOCK.postes);
+      else if(fn==='getCartes')cb(MOCK.cartes);
+      else if(fn==='getFactures')cb(MOCK.factures);
+      else if(fn==='getCommandes')cb(MOCK.commandes);
+      else if(fn==='getFournisseurs')cb(MOCK.frn);
       else if(fn==='supprimer'){var m={carte:'cartes',facture:'factures',commande:'commandes',fournisseur:'frn'}[a[0]];MOCK[m]=MOCK[m].filter(function(o){return o.id!==a[1];});cb(true);}
-      else cb('ok');}
+      else if(fn==='getTickets'){
+        cb(MOCK.tickets.map(function(t){var c=Object.assign({},t);try{c.donnees=JSON.parse(c.donnees_specifiques||'{}');}catch(e){c.donnees={};}return c;}));
+      }
+      else if(fn==='getStatsTickets'){
+        var rows=MOCK.tickets;
+        cb({total:rows.length,ouverts:rows.filter(function(t){return t.statut==='Nouveau'||t.statut==='En cours';}).length,resolus:rows.filter(function(t){return t.date_resolution;}).length,tempsMoyenJours:1.2});
+      }
+      else if(fn==='getTicket'){
+        var t=MOCK.tickets.filter(function(r){return r.id===a[0];})[0];
+        var c=Object.assign({},t);try{c.donnees=JSON.parse(c.donnees_specifiques||'{}');}catch(e){c.donnees={};}
+        c.historique=MOCK.ticketsHist[t.id]||[{cree_le:t.cree_le,auteur:t.demandeur_nom,contenu:'Ticket créé'}];
+        cb(c);
+      }
+      else if(fn==='majStatutTicket'){var t=MOCK.tickets.filter(function(r){return r.id===a[0];})[0];t.statut=a[1];cb(true);}
+      else if(fn==='majTicket'){var t=MOCK.tickets.filter(function(r){return r.id===a[0];})[0];Object.assign(t,a[1]);cb(true);}
+      else if(fn==='addCommentaire'){var id=a[0];MOCK.ticketsHist[id]=MOCK.ticketsHist[id]||[];MOCK.ticketsHist[id].push({cree_le:'maintenant',auteur:'moi',contenu:a[1]});cb(true);}
+      else if(fn==='addTicket'){var id2='TIK-MOCK-'+Math.floor(Math.random()*900+100);MOCK.tickets.unshift(Object.assign({id:id2,statut:'Nouveau',source:'hub',statut_validation:'valide',cree_le:'maintenant',donnees_specifiques:'{}'},a[0]));cb(id2);}
+      else cb('ok');
+    }
   }
+
   function load(){
     srv('getPostes',[],function(p){POSTES=p||[];
     srv('getCartes',[],function(c){CARTES=c||[];
@@ -307,7 +494,6 @@
   function htPO(po){var s=0;facturesY().forEach(function(f){if(f.numero_po&&String(f.numero_po)===String(po))s+=num(f.montant_ht);});return s;}
   function actBtns(mod,id){return '<div class="act-grp"><button class="act-btn edt" data-mod="'+mod+'" data-id="'+esc(id)+'" title="Modifier">✎</button><button class="act-btn del" data-mod="'+mod+'" data-id="'+esc(id)+'" title="Supprimer">✕</button></div>';}
 
-  // ── Edit helpers ──
   function findById(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i];return null;}
   function setVal(id,v){var el=$(id);if(!el)return;if(el.tagName==='SELECT'){for(var i=0;i<el.options.length;i++){if(el.options[i].value==v||el.options[i].text==v){el.selectedIndex=i;break;}}return;}el.value=v==null?'':v;}
   function scrollTo(el){el.scrollIntoView({behavior:'smooth',block:'start'});}
@@ -461,13 +647,11 @@
   $('c-search').addEventListener('input',renderCartes);
   $('fa-search').addEventListener('input',renderFactures);
   $('fr-search').addEventListener('input',renderFrn);
-  // ── Delete handler ──
   document.addEventListener('click',function(e){
     var b=e.target.closest?e.target.closest('.del'):null; if(!b)return;
     if(!window.confirm('Supprimer définitivement cette ligne ?'))return;
     b.disabled=true;srv('supprimer',[b.dataset.mod,b.dataset.id],function(){toast('Ligne supprimée');load();});
   });
-  // ── Edit handler ──
   document.addEventListener('click',function(e){
     var b=e.target.closest?e.target.closest('.edt'):null; if(!b)return;
     var mod=b.dataset.mod,id=b.dataset.id;
@@ -476,19 +660,15 @@
     else if(mod==='commande')startEditCommande(id);
     else if(mod==='fournisseur')startEditFrn(id);
   });
-  // ── Cancel handlers ──
   $('c-cancel').addEventListener('click',cancelEditCarte);
   $('fa-cancel').addEventListener('click',cancelEditFacture);
   $('pr-cancel').addEventListener('click',cancelEditCommande);
   $('fr-cancel').addEventListener('click',cancelEditFrn);
-  // ── Nav ──
   Array.prototype.forEach.call(document.querySelectorAll('.nav button'),function(b){b.addEventListener('click',function(){
     Array.prototype.forEach.call(document.querySelectorAll('.nav button'),function(x){x.classList.toggle('on',x===b);});
     Array.prototype.forEach.call(document.querySelectorAll('.view'),function(v){v.classList.toggle('on',v.dataset.view===b.dataset.v);});window.scrollTo(0,0);});});
-  // ── Live calc ──
   function mkCalc(t,v,o){function c(){var x=parseFloat($(t).value),r=parseFloat($(v).value);$(o).textContent=x>0?('HT '+euro2(x/(1+r/100))+' · TVA '+euro2(x-x/(1+r/100))):'HT — · TVA —';}$(t).addEventListener('input',c);$(v).addEventListener('change',c);}
   mkCalc('c-ttc','c-tva','c-calc');mkCalc('fa-ttc','fa-tva','fa-calc');
-  // ── Cartes submit ──
   $('c-add').addEventListener('click',function(){var b=this,ttc=parseFloat($('c-ttc').value),four=$('c-four').value.trim();
     if(!ttc||ttc<=0){showErr('Indique le montant TTC.');return;}if(!four){showErr('Indique le fournisseur.');return;}
     $('err').style.display='none';b.disabled=true;
@@ -500,7 +680,6 @@
       b.textContent='Enregistrement…';
       srv('addCarte',[payload],function(){$('c-ttc').value='';$('c-four').value='';$('c-lib').value='';$('c-calc').textContent='HT — · TVA —';b.disabled=false;b.textContent='Enregistrer le paiement';toast('Paiement carte enregistré');load();});
     }});
-  // ── Factures submit ──
   $('fa-add').addEventListener('click',function(){var b=this,ttc=parseFloat($('fa-ttc').value),four=$('fa-four').value.trim(),n=$('fa-num').value.trim();
     if(!n){showErr('Indique le n° de facture.');return;}if(!four){showErr('Indique le fournisseur.');return;}if(!ttc||ttc<=0){showErr('Indique le montant TTC.');return;}
     $('err').style.display='none';b.disabled=true;
@@ -517,7 +696,6 @@
       b.textContent='Enregistrement…';
       doFile(function(){srv('addFacture',[payload],function(){$('fa-num').value='';$('fa-four').value='';$('fa-ttc').value='';$('fa-date').value='';$('fa-file').value='';$('fa-calc').textContent='HT — · TVA —';b.disabled=false;b.textContent='Enregistrer la facture';toast('Facture enregistrée');load();});});
     }});
-  // ── PR submit ──
   $('pr-add').addEventListener('click',function(){var b=this,mt=parseFloat($('pr-mt').value),n=$('pr-num').value.trim();
     if(!n){showErr('Indique le n° de PR.');return;}if(!mt||mt<=0){showErr('Indique le montant engagé HT.');return;}
     $('err').style.display='none';b.disabled=true;
@@ -529,7 +707,6 @@
       b.textContent='Création…';
       srv('addCommande',[payload],function(){$('pr-num').value='';$('pr-mt').value='';$('pr-four').value='';$('pr-objet').value='';b.disabled=false;b.textContent='Créer la PR';toast('PR créée');load();});
     }});
-  // ── Fournisseurs submit ──
   $('fr-add').addEventListener('click',function(){var b=this,nom=$('fr-nom').value.trim();
     if(!nom){showErr('Indique le nom du fournisseur.');return;}
     $('err').style.display='none';b.disabled=true;
@@ -540,7 +717,200 @@
       b.textContent='Ajout…';
       srv('addFournisseur',[{nom:nom,numero_fournisseur:$('fr-num').value.trim(),telephone:$('fr-tel').value.trim(),source:'hub'}],function(){$('fr-nom').value='';$('fr-num').value='';$('fr-tel').value='';b.disabled=false;b.textContent='Ajouter le fournisseur';toast('Fournisseur ajouté');load();});
     }});
+
+  // ============================================================
+  // MODULE TICKETS (namespacé sous Tickets.* pour ne rien casser du Budget)
+  // ============================================================
+  var Tickets = (function(){
+    var TYPE_LABELS = { badge:'Badge', courrier:'Courrier', panne_casse:'Panne / Casse', casier:'Casier', proprete:'Propreté', autre:'Autre' };
+    var STATE = { tickets: [], stats: {} };
+
+    function escHtml(s){ var d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
+
+    function charger() {
+      srv('getTickets', [], function(rows){ STATE.tickets = rows; render(); });
+      srv('getStatsTickets', [], function(s){ STATE.stats = s; renderStats(); });
+    }
+
+    function renderStats() {
+      var s = STATE.stats;
+      $('t-stats').innerHTML = [
+        stat(s.ouverts, 'Tickets ouverts'),
+        stat(s.total, 'Total'),
+        stat(s.tempsMoyenJours!=null ? s.tempsMoyenJours + ' j' : '—', 'Temps moyen de résolution'),
+        stat(s.resolus, 'Résolus')
+      ].join('');
+    }
+    function stat(n, l) { return '<div class="stat"><div class="stat-v">'+n+'</div><div class="stat-l">'+l+'</div></div>'; }
+
+    function render() {
+      var fs = $('t-fStatut').value;
+      var ft = $('t-fType').value;
+      var fr = $('t-fRecherche').value.trim().toLowerCase();
+
+      var rows = STATE.tickets.filter(function(t){
+        if (fs && t.statut !== fs) return false;
+        if (ft && t.type !== ft) return false;
+        if (fr) {
+          var blob = [t.id,t.objet,t.description,t.demandeur_nom,t.demandeur_email,t.site,t.localisation].join(' ').toLowerCase();
+          if (blob.indexOf(fr) === -1) return false;
+        }
+        return true;
+      });
+
+      var tbody = $('t-tbody');
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="muted">Aucun ticket ne correspond à ces filtres.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(function(t){
+        var av = t.statut_validation === 'a_valider' ? '<span class="t-to-validate">à valider</span>' : '';
+        var stCls = { 'Nouveau':'b-blue', 'En cours':'b-amber', 'Résolu':'b-green', 'Fermé':'b-grey' }[t.statut] || 'b-grey';
+        var prCls = { 'Urgente':'b-amber', 'Haute':'b-amber', 'Normale':'b-grey', 'Basse':'b-grey' }[t.priorite] || 'b-grey';
+        return '<tr onclick="Tickets.ouvrirDrawer(\''+t.id+'\')">'
+          + '<td>'+t.id+'</td>'
+          + '<td><span class="badge b-purple">'+ (TYPE_LABELS[t.type]||t.type) +'</span></td>'
+          + '<td>'+ escHtml(t.objet || '—') + av +'</td>'
+          + '<td>'+ escHtml(t.demandeur_nom||'—') + (t.source==='qr' ? ' <span class="t-src">(QR)</span>' : '') +'</td>'
+          + '<td><span class="badge '+prCls+'">'+t.priorite+'</span></td>'
+          + '<td><span class="badge '+stCls+'">'+t.statut+'</span></td>'
+          + '<td>'+t.cree_le+'</td>'
+          + '</tr>';
+      }).join('');
+    }
+
+    function ouvrirDrawer(id) {
+      srv('getTicket', [id], function(t){
+        $('t-drawer').innerHTML = drawerHtml(t);
+        $('t-drawerOverlay').classList.add('open');
+      });
+    }
+    function fermerDrawer() { $('t-drawerOverlay').classList.remove('open'); charger(); }
+
+    function drawerHtml(t) {
+      var donnees = t.donnees || {};
+      var champsSpecifiques = Object.keys(donnees).map(function(k){
+        var v = donnees[k];
+        if (k === 'photo_url' && v) return '<div class="t-field-row"><div><label>Photo</label><a href="'+v+'" target="_blank">Voir la photo</a></div></div>';
+        return '<div class="t-field-row"><div><label>'+k.replace(/_/g,' ')+'</label>'+escHtml(v)+'</div></div>';
+      }).join('');
+
+      var timeline = (t.historique||[]).map(function(e){
+        return '<div class="t-tl-item"><div class="meta">'+e.cree_le+' — '+escHtml(e.auteur||'')+'</div><div class="content">'+escHtml(e.contenu)+'</div></div>';
+      }).join('') || '<div class="t-tl-item"><div class="content" style="color:var(--mute)">Aucun évènement</div></div>';
+
+      return ''
+        + '<button class="t-close-x" type="button" onclick="Tickets.fermerDrawer()">×</button>'
+        + '<h2>'+t.id+'</h2>'
+        + '<div class="sub"><span class="badge b-purple">'+(TYPE_LABELS[t.type]||t.type)+'</span> · créé le '+t.cree_le+' · source : '+t.source+'</div>'
+
+        + '<div class="t-field-row">'
+          + '<div><label>Statut</label><select id="t-drawStatut">'
+            + ['Nouveau','En cours','Résolu','Fermé'].map(function(s){return '<option '+(s===t.statut?'selected':'')+'>'+s+'</option>';}).join('')
+          + '</select></div>'
+          + '<div><label>Priorité</label><select id="t-drawPriorite">'
+            + ['Basse','Normale','Haute','Urgente'].map(function(p){return '<option '+(p===t.priorite?'selected':'')+'>'+p+'</option>';}).join('')
+          + '</select></div>'
+        + '</div>'
+        + '<button class="t-btn" type="button" onclick="Tickets.appliquerStatut(\''+t.id+'\')" style="margin-bottom:16px">Mettre à jour</button>'
+
+        + '<div class="t-field-row"><div><label>Objet</label>'+escHtml(t.objet||'—')+'</div></div>'
+        + '<div class="t-box">'+escHtml(t.description||'—')+'</div>'
+
+        + '<div class="t-field-row">'
+          + '<div><label>Demandeur</label>'+escHtml(t.demandeur_nom||'—')+'</div>'
+          + '<div><label>Email</label>'+escHtml(t.demandeur_email||'—')+'</div>'
+        + '</div>'
+        + '<div class="t-field-row">'
+          + '<div><label>Site</label>'+escHtml(t.site||'—')+'</div>'
+          + '<div><label>Localisation</label>'+escHtml(t.localisation||'—')+'</div>'
+        + '</div>'
+        + champsSpecifiques
+
+        + '<h3 style="font-size:14px;margin:20px 0 4px;">Timeline</h3>'
+        + '<div class="t-timeline">'+timeline+'</div>'
+
+        + '<label style="font-size:12px;color:var(--soft);display:block;margin-bottom:5px;">Ajouter un commentaire</label>'
+        + '<textarea id="t-drawComment" placeholder="Votre réponse ou note interne..."></textarea>'
+        + '<button class="t-btn" type="button" style="margin-top:8px" onclick="Tickets.envoyerCommentaire(\''+t.id+'\')">Ajouter</button>';
+    }
+
+    function appliquerStatut(id) {
+      var statut = $('t-drawStatut').value;
+      var priorite = $('t-drawPriorite').value;
+      srv('majStatutTicket', [id, statut, ''], function(){
+        srv('majTicket', [id, {priorite: priorite}], function(){
+          toast('Ticket mis à jour');
+          ouvrirDrawer(id);
+        });
+      });
+    }
+
+    function envoyerCommentaire(id) {
+      var texte = $('t-drawComment').value.trim();
+      if (!texte) return;
+      srv('addCommentaire', [id, texte], function(){
+        toast('Commentaire ajouté');
+        ouvrirDrawer(id);
+      });
+    }
+
+    function ouvrirModalNouveau() {
+      $('t-modalNouveau').innerHTML = ''
+        + '<h2 style="margin-top:0">Nouveau ticket</h2>'
+        + '<div class="t-form-row"><label>Type</label><select id="t-nType">'
+          + '<option value="badge">Badge</option><option value="courrier">Courrier</option>'
+          + '<option value="panne_casse">Panne / Casse</option><option value="casier">Casier</option>'
+          + '<option value="proprete">Propreté</option><option value="autre">Autre</option>'
+        + '</select></div>'
+        + '<div class="t-form-row"><label>Objet</label><input type="text" id="t-nObjet"></div>'
+        + '<div class="t-form-row"><label>Description</label><textarea id="t-nDescription"></textarea></div>'
+        + '<div class="t-form-row"><label>Nom du demandeur</label><input type="text" id="t-nNom"></div>'
+        + '<div class="t-form-row"><label>Email du demandeur</label><input type="email" id="t-nEmail"></div>'
+        + '<div class="t-form-row"><label>Site</label><input type="text" id="t-nSite"></div>'
+        + '<div class="t-form-row"><label>Priorité</label><select id="t-nPriorite">'
+          + '<option>Basse</option><option selected>Normale</option><option>Haute</option><option>Urgente</option>'
+        + '</select></div>'
+        + '<div id="t-nErr" class="t-err"></div>'
+        + '<div style="display:flex;gap:10px;margin-top:14px;">'
+          + '<button class="t-btn" type="button" onclick="Tickets.creerTicket()">Créer</button>'
+          + '<button class="t-btn-ghost" type="button" onclick="Tickets.fermerModalNouveau()">Annuler</button>'
+        + '</div>';
+      $('t-modalOverlay').classList.add('open');
+    }
+    function fermerModalNouveau() { $('t-modalOverlay').classList.remove('open'); }
+
+    function creerTicket() {
+      var data = {
+        type: $('t-nType').value,
+        objet: $('t-nObjet').value.trim(),
+        description: $('t-nDescription').value.trim(),
+        demandeur_nom: $('t-nNom').value.trim(),
+        demandeur_email: $('t-nEmail').value.trim(),
+        site: $('t-nSite').value.trim(),
+        priorite: $('t-nPriorite').value,
+        donnees: {}
+      };
+      if (!data.objet) { $('t-nErr').textContent = 'L\'objet est obligatoire.'; return; }
+      srv('addTicket', [data], function(){
+        fermerModalNouveau();
+        toast('Ticket créé');
+        charger();
+      });
+    }
+
+    return {
+      charger: charger, render: render, ouvrirDrawer: ouvrirDrawer, fermerDrawer: fermerDrawer,
+      appliquerStatut: appliquerStatut, envoyerCommentaire: envoyerCommentaire,
+      ouvrirModalNouveau: ouvrirModalNouveau, fermerModalNouveau: fermerModalNouveau, creerTicket: creerTicket
+    };
+  })();
+
+  // ============================================================
+  // Chargement initial des deux modules
+  // ============================================================
   load();
+  Tickets.charger();
 </script>
 </body>
 </html>

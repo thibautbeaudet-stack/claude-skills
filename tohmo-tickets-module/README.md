@@ -1,30 +1,27 @@
 # Module Tickets — Tohmo Office Hub
 
-Ce dossier contient tout ce qu'il faut pour ajouter le module **Tickets** à ton projet Apps Script "HUB" existant, à côté du module Budget & Achats déjà en prod.
+Ce dossier contient tout ce qu'il faut pour ajouter le module **Tickets** à ton projet Apps Script "HUB" existant, dans le même programme que le module Budget & Achats déjà en prod.
 
-Trois fichiers :
+Deux fichiers seulement :
 - `Code_ajouts_tickets.gs` → fonctions serveur à coller dans ton `Code.gs`
-- `tickets.html` → l'écran interne de gestion des tickets (toi, connectée avec ton compte Google)
-- `formulaire_ticket.html` → le formulaire public (les collaborateurs, sans compte Google, via QR code)
-
-Aucun de ces fichiers ne touche à ton module Budget existant.
+- `index.html` → remplace entièrement ton fichier actuel : Budget **et** Tickets sont maintenant deux sections de la même page, affichées/masquées en JavaScript via la sidebar (aucun rechargement, aucun lien entre "pages")
+- `formulaire_ticket.html` → le formulaire public (les collaborateurs, sans compte Google, via QR code) — reste un fichier séparé exprès, car il doit s'ouvrir sans passer par le Hub
 
 ---
 
-## 1. Comment ça s'articule avec le Hub existant (et pourquoi)
+## 1. Pourquoi ce choix d'architecture (et ce qui a changé)
 
-Ton `doGet()` actuel ne sait servir qu'**une seule page** : `index.html` (le Budget). Il faut lui apprendre à servir 2 pages en plus, selon un paramètre dans l'URL :
+Première version : Tickets était un fichier HTML séparé, ouvert via un lien `?page=tickets`. Ça semblait plus simple, mais Apps Script sert chaque page depuis une adresse technique cachée (un domaine `googleusercontent.com`), et les liens internes (`<a href="?page=tickets">`) se sont résolus contre cette adresse cachée au lieu de la vraie URL — d'où les pages blanches qu'on a rencontrées, de façon peu fiable.
 
-- `...exec?page=tickets` → l'écran interne de gestion (nécessite d'être connectée, comme le Budget)
-- `...exec?page=ticket` → le formulaire public (accessible à tout le monde, même sans compte Google — c'est celui du QR code)
+**La solution robuste : un seul programme, une seule page.** Budget et Tickets sont maintenant deux sections (`<section>`) dans le même `index.html`. La sidebar ne contient plus de liens (`<a href>`) mais des boutons JavaScript qui affichent une section et masquent l'autre — exactement comme fonctionnent déjà tes onglets internes du Budget (Budget / Mensuel / Cartes / Factures...). Aucune navigation entre "pages" côté Apps Script, donc plus aucun risque de ce bug.
 
-**Pourquoi des fichiers séparés plutôt que tout fusionner dans `index.html` ?** J'ai hésité entre les deux options. Fusionner donnerait une appli "une seule page" plus fluide (pas de rechargement en changeant d'onglet), mais ça veut dire modifier en profondeur ton `index.html` qui fonctionne déjà en prod — gros risque de casser le Budget pour un gain surtout esthétique. En gardant Tickets dans ses propres fichiers, la seule modification sur ton code existant est **une fonction `doGet()` à remplacer** (3 lignes ajoutées) et **un lien à ajouter** dans ton menu. Le module Budget n'est pas touché. C'est le choix le plus sûr pour toi vu que tu ne codes pas — en cas de souci, il suffit de revenir à l'ancien `doGet()`.
+Le formulaire public (`formulaire_ticket.html`) reste un fichier séparé car il doit être ouvrable directement par un lien/QR code, sans passer par le Hub — ça reste géré par `doGet(e)` avec `?page=ticket`.
 
 ---
 
 ## 2. Étape 1 — Créer les onglets dans le Google Sheet
 
-Dans "Suivi Tohmo Hub", crée deux nouveaux onglets.
+Dans le Sheet **Tickets séparé** que tu as créé (`Tohmo Hub - Tickets`), crée deux onglets.
 
 ### Onglet `tickets`
 
@@ -71,119 +68,81 @@ C'est la "timeline" de chaque ticket (création, changements de statut, commenta
 | `auteur` | qui a fait l'action | `office@tohmo.fr` |
 | `cree_le` | horodatage | `11/07/2026 09:12` |
 
-Pas besoin de remplir ces onglets à la main : le code s'en charge (`appendRow`, comme pour le Budget).
+Pas besoin de remplir ces onglets à la main : le code s'en charge (`appendRowTickets`).
 
 ---
 
-## 3. Étape 2 — Ajouter le code serveur
+## 3. Étape 2 — Code serveur (`Code.gs`)
 
-1. Apps Script > `Code.gs` > colle tout le contenu de `Code_ajouts_tickets.gs` **à la fin** du fichier.
-2. Tout en haut de ce bloc collé, personnalise :
+1. Colle tout le contenu de `Code_ajouts_tickets.gs` à la fin de ton `Code.gs`.
+2. Personnalise en haut du bloc :
+   - `SS_TICKETS_ID` → déjà rempli avec l'ID de ton Sheet Tickets.
    - `SITES_TICKETS` → remplace par la vraie liste de vos sites Tohmo.
-   - `DOSSIER_PHOTOS_TICKETS` → l'ID d'un dossier Drive où seront rangées les photos de panne/casse envoyées depuis le formulaire public (même principe que `DOSSIER_FACTURES` que tu as déjà). Pour trouver l'ID : ouvre le dossier dans Drive, l'ID est le morceau de texte dans l'URL après `folders/`.
-
-   ⚠️ La liste des sites est actuellement recopiée à deux endroits : `SITES_TICKETS` dans `Code_ajouts_tickets.gs` (utilisé nulle part pour l'instant, gardé en réserve) et le tableau `sites` dans `formulaire_ticket.html` (fonction `champsPourType`, cherche `var sites = [...]`). Si tu changes la liste des sites, modifie-la aux deux endroits pour rester cohérent.
-3. Repère ta fonction `doGet()` existante :
-
-```javascript
-function doGet() { return HtmlService.createHtmlOutputFromFile('index').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL); }
-```
-
-Remplace-la par :
+   - `DOSSIER_PHOTOS_TICKETS` → ID du dossier Drive pour les photos de panne/casse (optionnel, seulement si le formulaire de panne/casse est utilisé avec photo).
+3. Simplifie ta fonction `doGet()` : elle n'a plus besoin de gérer qu'**une seule page en plus** (le formulaire public) :
 
 ```javascript
 function doGet(e) {
   var page = (e && e.parameter && e.parameter.page) || '';
   if (page === 'ticket') {
-    return HtmlService.createHtmlOutputFromFile('formulaire_ticket')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
-      .setTitle('Nouvelle demande — Tohmo');
+    return HtmlService.createHtmlOutputFromFile('formulaire_ticket').setTitle('Nouvelle demande — Tohmo');
   }
-  if (page === 'tickets') {
-    return HtmlService.createHtmlOutputFromFile('tickets')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
-      .setTitle('Tickets — Tohmo Hub');
-  }
-  return HtmlService.createHtmlOutputFromFile('index').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  return HtmlService.createHtmlOutputFromFile('index').setTitle('Tohmo — Budget & achats').addMetaTag('viewport','width=device-width, initial-scale=1');
 }
 ```
 
-C'est la seule modification sur du code existant. Tout le reste (Budget) continue de fonctionner exactement pareil.
+---
+
+## 4. Étape 3 — Fichiers HTML
+
+1. **Remplace entièrement** le contenu de `index.html` par la nouvelle version (Budget + Tickets fusionnés).
+2. Si tu as un fichier `tickets` (ou `ticket`) créé lors de la première tentative, **supprime-le** du projet Apps Script (clic droit sur le fichier → Supprimer) — il n'est plus utilisé et sert seulement à créer de la confusion.
+3. Garde `formulaire_ticket` tel quel (juste les icônes ont changé, plus d'emoji).
 
 ---
 
-## 4. Étape 3 — Ajouter les fichiers HTML
+## 5. Étape 4 — Déployer
 
-Dans Apps Script, clique sur le **+** à côté de "Fichiers" > **HTML** :
-1. Crée un fichier nommé exactement `tickets` → colle le contenu de `tickets.html`
-2. Crée un fichier nommé exactement `formulaire_ticket` → colle le contenu de `formulaire_ticket.html`
-
-(Apps Script ajoute l'extension `.html` tout seul, ne la tape pas dans le nom.)
+`Déployer` → `Gérer les déploiements` → icône crayon ✏️ → `Nouvelle version` → `Déployer`.
 
 ---
 
-## 5. Étape 4 — Ajouter un accès depuis le Hub (Budget)
+## 6. Étape 5 — Récupérer le lien du QR code
 
-Dans ton `index.html` existant, ajoute un lien vers le module Tickets, par exemple dans ta barre de navigation :
+Une fois déployé, ton URL de base est du type `https://script.google.com/a/macros/zeplug.com/s/XXXXX/exec`.
 
-```html
-<a href="?page=tickets">🎫 Tickets</a>
-```
-
-Comme l'app est servie sur une URL du type `.../exec`, ce lien pointera automatiquement vers `.../exec?page=tickets`. Mets-le où tu veux dans ton menu actuel — il n'y a rien d'autre à changer.
+- **Le Hub complet (Budget + Tickets)** : cette URL telle quelle. Tickets est accessible via l'icône dans la sidebar, sans rechargement.
+- **Lien public (QR code)** : la même URL + `?page=ticket` — accessible sans compte, c'est celui à transformer en QR code à imprimer/afficher dans les bureaux.
 
 ---
 
-## 6. Étape 5 — Déployer
+## 7. Vérifier que l'accès public fonctionne bien
 
-**Rappel du piège n°1** : Apps Script sert une version figée. Après avoir collé tout ce code :
-
-`Déployer` → `Gérer les déploiements` → icône crayon sur ton déploiement actif → `Nouvelle version` → `Déployer`
-
-Tant que tu ne fais pas ça, tes utilisateurs continuent de voir l'ancienne version, même si le code a changé.
+Le formulaire public doit être accessible **sans connexion Google**. Vérifie dans `Déployer > Gérer les déploiements` que "Qui a accès" correspond à ce que tu veux (Tout le monde vs Tout le monde dans l'organisation) — voir la discussion complète dans l'historique de conversation si besoin de rappel sur ce point.
 
 ---
 
-## 7. Étape 6 — Récupérer les deux liens utiles
+## 8. Ce que fait chaque fonction serveur (résumé)
 
-Une fois déployé, ton URL de base ressemble à `https://script.google.com/macros/s/XXXXX/exec`.
+| Fonction | Rôle |
+|---|---|
+| `getTickets()` | liste tous les tickets |
+| `getTicket(id)` | un ticket + sa timeline |
+| `getStatsTickets()` | chiffres du bandeau stats |
+| `addTicket(data)` | créer un ticket depuis le hub |
+| `addTicketPublic(data)` | créer un ticket depuis le QR |
+| `majStatutTicket(id, statut, commentaire)` | changer le statut |
+| `majTicket(id, updates)` | modifier priorité/site/etc. |
+| `addCommentaire(id, texte)` | ajouter une réponse/note |
+| `uploadPhotoTicket(base64, nom, mime)` | stocker une photo panne/casse dans Drive |
 
-- **Lien interne (toi)** : `https://script.google.com/macros/s/XXXXX/exec?page=tickets` — nécessite d'être connectée avec un compte de l'organisation.
-- **Lien public (QR code)** : `https://script.google.com/macros/s/XXXXX/exec?page=ticket` — accessible sans compte, c'est celui à transformer en QR code à imprimer/afficher dans les bureaux.
-
-Pour le QR code : n'importe quel générateur de QR code fonctionne avec ce lien. Si tu veux, donne-moi l'URL une fois déployée et je peux t'en générer un directement (j'ai un outil pour ça).
-
----
-
-## 8. Vérifier que l'accès public fonctionne bien
-
-Le formulaire public doit être accessible **sans connexion Google**. Vérifie dans `Déployer > Gérer les déploiements` que :
-- "Exécuter en tant que" = **Moi** (ton compte, celui qui a créé le script)
-- "Qui a accès" = **Tout le monde** (pas "Tout le monde dans l'organisation" — sinon le QR code demandera un compte Tohmo, ce qui exclut les visiteurs/prestataires si besoin ; si tu veux limiter aux collaborateurs Tohmo, choisis plutôt "Tout le monde dans l'organisation" pour ce déploiement, mais alors le formulaire demandera une connexion Google)
-
-Si tu veux que le formulaire QR reste réservé aux collaborateurs Tohmo (compte Google Workspace), tu peux garder "Tout le monde dans l'organisation" comme pour le Budget — dans ce cas `cree_par` sera rempli automatiquement avec l'email du collaborateur connecté plutôt que "formulaire_public".
+Toutes ces fonctions vivent dans `Code.gs` et sont appelées via `google.script.run` depuis `index.html` (section Tickets) ou `formulaire_ticket.html`.
 
 ---
 
-## 9. Ce que fait chaque fonction serveur (résumé)
+## 9. Détails techniques pour la suite
 
-| Fonction | Rôle | Appelée depuis |
-|---|---|---|
-| `getTickets()` | liste tous les tickets | `tickets.html` |
-| `getTicket(id)` | un ticket + sa timeline | `tickets.html` |
-| `getStatsTickets()` | chiffres du bandeau stats | `tickets.html` |
-| `addTicket(data)` | créer un ticket depuis le hub | `tickets.html` |
-| `addTicketPublic(data)` | créer un ticket depuis le QR | `formulaire_ticket.html` |
-| `majStatutTicket(id, statut, commentaire)` | changer le statut | `tickets.html` |
-| `majTicket(id, updates)` | modifier priorité/site/etc. | `tickets.html` |
-| `addCommentaire(id, texte)` | ajouter une réponse/note | `tickets.html` |
-| `uploadPhotoTicket(base64, nom, mime)` | stocker une photo panne/casse dans Drive | `formulaire_ticket.html` |
-| `getListesTickets()` | listes fermées (sites, types...) — fournie en utilitaire, pas encore appelée | — |
-
-Tous réutilisent tes helpers existants (`readSheet`, `appendRow`, `updateRowById`, `uid`, `nowStr`, `who`, `cellVal`) — rien n'est redéfini en double.
-
----
-
-## 10. Prévisualiser sans Apps Script
-
-Les deux fichiers HTML détectent automatiquement s'ils tournent dans Apps Script (`google.script.run` disponible) ou pas. Si tu ouvres `tickets.html` ou `formulaire_ticket.html` directement dans un navigateur (double-clic sur le fichier), ils basculent sur des données factices (MOCK) pour que tu puisses voir le rendu visuel avant de tout coller dans Apps Script.
+- **Namespacing JS** : tout le code du module Tickets dans `index.html` est isolé sous l'objet `Tickets.*` (ex. `Tickets.render()`, `Tickets.ouvrirDrawer()`) pour ne jamais entrer en conflit avec les fonctions du Budget qui restent inchangées (`load()`, `renderAll()`, etc.).
+- **CSS namespacing** : toutes les classes propres à Tickets sont préfixées `t-` (`.t-table`, `.t-drawer`, `.t-btn`...) pour ne jamais écraser le style du Budget.
+- **Icônes** : tous les émojis ont été remplacés par des icônes SVG monochromes (trait fin, cohérentes avec la charte). Les modules non construits sont grisés dans la sidebar avec l'infobulle "bientôt disponible".
+- **Prévisualisation locale** : `index.html` et `formulaire_ticket.html` détectent s'ils tournent dans Apps Script ou non ; hors Apps Script ils basculent sur des données factices (MOCK) pour prévisualiser le rendu visuel.
