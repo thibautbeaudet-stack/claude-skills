@@ -6,7 +6,10 @@
  * 2. Ouvre ton fichier Code.gs existant
  * 3. Colle TOUT le contenu de ce fichier À LA SUITE de ton code existant (à la fin du fichier)
  * 4. Renseigne VILLES_VEHICULES ci-dessous avec ta vraie liste de villes Tohmo
- * 5. Sauvegarde, puis lance UNE FOIS la fonction creerOngletsVehicules() (voir plus bas)
+ * 5. Sauvegarde, puis lance UNE FOIS la fonction creerOngletsVehicules() (voir plus bas).
+ *    Si tu avais déjà ce module installé avant cette mise à jour (colonnes categorie/proprietaire
+ *    nouvelles), relance simplement creerOngletsVehicules() : elle complète les colonnes
+ *    manquantes sans toucher aux données déjà présentes.
  * 6. Si tu avais déjà des véhicules créés avant cette mise à jour, lance aussi UNE FOIS
  *    synchroniserDossiersDriveVehicules() pour leur associer leur dossier Drive rétroactivement
  * 7. N'oublie pas : Déployer > Gérer les déploiements > Nouvelle version (sinon rien ne change en prod)
@@ -41,6 +44,9 @@ var VILLES_VEHICULES = ['Paris', 'Lyon', 'Marseille', 'Bordeaux'];
 // Valeurs fermées (doivent correspondre EXACTEMENT aux validations de données du Sheet)
 var VEHICULE_TYPES   = ['citadine', 'berline', 'utilitaire', 'suv', 'autre'];
 var VEHICULE_STATUTS = ['En service', 'En maintenance', 'Hors service'];
+// Pool = partagé entre plusieurs collaborateurs, pas de propriétaire attitré.
+// Fonction = attribué nominativement à un collaborateur, qui en est le propriétaire.
+var VEHICULE_CATEGORIES = ['Pool', 'Fonction'];
 
 // Nombre de jours avant échéance (CT, assurance, entretien, fin de contrat) à partir duquel on affiche une alerte "à renouveler"
 var VEHICULE_SEUIL_ALERTE_JOURS = 30;
@@ -111,8 +117,8 @@ function deleteRowByIdVehicules(sheetName, id) {
 // ============================================================
 
 var VEHICULES_ENTETES = [
-  'id','immatriculation','marque','modele','type','statut','ville',
-  'conducteur_nom','conducteur_email',
+  'id','immatriculation','marque','modele','type','categorie','statut','ville',
+  'conducteur_nom','conducteur_email','proprietaire',
   'kilometrage','km_contrat','duree_contrat_annees','loyer_mensuel','date_fin_contrat',
   'date_ct','date_assurance','date_entretien',
   'lien_drive','notes','cree_le','cree_par','maj_le'
@@ -122,7 +128,8 @@ var VEHICULES_HISTORIQUE_ENTETES = ['id','vehicule_id','type_evenement','contenu
 /**
  * Crée les onglets "vehicules" et "vehicules_historique" DANS LE SHEET DÉDIÉ (SS_VEHICULES_ID),
  * avec les en-têtes exactement attendus par le code, plus les garde-fous (listes déroulantes).
- * Ne fait rien si les onglets existent déjà (sûr à relancer plusieurs fois).
+ * Ne fait rien si les onglets existent déjà — mais complète les colonnes manquantes (ex : une
+ * colonne ajoutée par une mise à jour ultérieure du module), donc sûr à relancer plusieurs fois.
  *
  * COMMENT LANCER : dans l'éditeur Apps Script (script.google.com), sélectionne cette fonction
  * dans la barre déroulante en haut ("creerOngletsVehicules"), puis clique sur ▶ Exécuter.
@@ -138,6 +145,8 @@ function creerOngletsVehicules() {
     shVeh.getRange(1, 1, 1, VEHICULES_ENTETES.length).setValues([VEHICULES_ENTETES]).setFontWeight('bold');
     shVeh.setFrozenRows(1);
     creees.push('vehicules');
+  } else {
+    ajouterColonnesManquantes(shVeh, VEHICULES_ENTETES);
   }
 
   var shHist = ss.getSheetByName('vehicules_historique');
@@ -146,19 +155,46 @@ function creerOngletsVehicules() {
     shHist.getRange(1, 1, 1, VEHICULES_HISTORIQUE_ENTETES.length).setValues([VEHICULES_HISTORIQUE_ENTETES]).setFontWeight('bold');
     shHist.setFrozenRows(1);
     creees.push('vehicules_historique');
+  } else {
+    ajouterColonnesManquantes(shHist, VEHICULES_HISTORIQUE_ENTETES);
   }
 
-  function dv(list) { return SpreadsheetApp.newDataValidation().requireValueInList(list, true).setAllowInvalid(false).build(); }
   var rows = Math.max(shVeh.getMaxRows() - 1, 200);
-  shVeh.getRange(2, VEHICULES_ENTETES.indexOf('type') + 1, rows, 1).setDataValidation(dv(VEHICULE_TYPES));
-  shVeh.getRange(2, VEHICULES_ENTETES.indexOf('statut') + 1, rows, 1).setDataValidation(dv(VEHICULE_STATUTS));
-  shVeh.getRange(2, VEHICULES_ENTETES.indexOf('ville') + 1, rows, 1).setDataValidation(dv(VILLES_VEHICULES));
+  poserValidationColonne(shVeh, 'type', VEHICULE_TYPES, rows);
+  poserValidationColonne(shVeh, 'categorie', VEHICULE_CATEGORIES, rows);
+  poserValidationColonne(shVeh, 'statut', VEHICULE_STATUTS, rows);
+  poserValidationColonne(shVeh, 'ville', VILLES_VEHICULES, rows);
 
   var msg = creees.length
-    ? 'Onglets créés dans le Sheet Véhicules : ' + creees.join(', ') + '. Garde-fous (type/statut/ville) posés.'
-    : 'Les onglets existaient déjà — garde-fous (type/statut/ville) réappliqués.';
+    ? 'Onglets créés dans le Sheet Véhicules : ' + creees.join(', ') + '. Garde-fous (type/catégorie/statut/ville) posés.'
+    : 'Les onglets existaient déjà — colonnes manquantes complétées, garde-fous (type/catégorie/statut/ville) réappliqués.';
   Logger.log(msg);
   return msg;
+}
+
+/** Retourne l'index 1-based de la colonne portant cet en-tête (normalisé), ou 0 si absente. */
+function indexColonneVehicules(sh, header) {
+  var largeur = sh.getLastColumn();
+  if (largeur < 1) return 0;
+  var entetes = sh.getRange(1, 1, 1, largeur).getValues()[0].map(function(h){return String(h).trim().toLowerCase().replace(/\s+/g,'_');});
+  return entetes.indexOf(header) + 1;
+}
+
+/** Ajoute à la fin de la ligne d'en-têtes les colonnes de `entetesAttendues` qui n'existent pas encore, sans toucher aux colonnes déjà là. */
+function ajouterColonnesManquantes(sh, entetesAttendues) {
+  var largeur = Math.max(sh.getLastColumn(), 1);
+  var entetesActuelles = sh.getRange(1, 1, 1, largeur).getValues()[0].map(function(h){return String(h).trim().toLowerCase().replace(/\s+/g,'_');});
+  var manquantes = entetesAttendues.filter(function(h){ return entetesActuelles.indexOf(h) === -1; });
+  if (!manquantes.length) return;
+  sh.getRange(1, largeur + 1, 1, manquantes.length).setValues([manquantes]).setFontWeight('bold');
+}
+
+/** Pose une validation "liste fermée" sur toute la colonne portant cet en-tête, si elle existe. */
+function poserValidationColonne(sh, header, liste, rows) {
+  var col = indexColonneVehicules(sh, header);
+  if (!col) return;
+  var dv = SpreadsheetApp.newDataValidation().requireValueInList(liste, true).setAllowInvalid(false).build();
+  sh.getRange(2, col, rows, 1).setDataValidation(dv);
 }
 
 // ============================================================
@@ -249,9 +285,11 @@ function parseDateFrVehicules(s) {
 
 /**
  * Ajoute un véhicule au parc.
- * data = { immatriculation, marque, modele, type, ville, conducteur_nom, conducteur_email,
- *          kilometrage, km_contrat, duree_contrat_annees, loyer_mensuel, date_fin_contrat,
+ * data = { immatriculation, marque, modele, type, categorie, ville, conducteur_nom, conducteur_email,
+ *          proprietaire, kilometrage, km_contrat, duree_contrat_annees, loyer_mensuel, date_fin_contrat,
  *          date_ct, date_assurance, date_entretien, lien_drive }
+ * categorie : 'Pool' (partagé, pas de propriétaire) ou 'Fonction' (attribué nominativement,
+ * proprietaire = le collaborateur à qui le véhicule est attribué).
  * Si lien_drive n'est pas fourni, le sous-dossier Drive du véhicule (nommé d'après son
  * immatriculation) est retrouvé ou créé automatiquement dans DOSSIER_VEHICULES_ID.
  */
@@ -268,10 +306,12 @@ function addVehicule(data) {
     marque: data.marque || '',
     modele: data.modele || '',
     type: data.type || 'autre',
+    categorie: VEHICULE_CATEGORIES.indexOf(data.categorie) > -1 ? data.categorie : 'Pool',
     statut: 'En service',
     ville: data.ville || '',
     conducteur_nom: data.conducteur_nom || '',
     conducteur_email: data.conducteur_email || '',
+    proprietaire: data.proprietaire || '',
     kilometrage: data.kilometrage || 0,
     km_contrat: data.km_contrat || 0,
     duree_contrat_annees: data.duree_contrat_annees || '',
@@ -382,6 +422,7 @@ function getListesVehicules() {
   return {
     villes: VILLES_VEHICULES,
     types: VEHICULE_TYPES,
-    statuts: VEHICULE_STATUTS
+    statuts: VEHICULE_STATUTS,
+    categories: VEHICULE_CATEGORIES
   };
 }

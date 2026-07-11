@@ -46,10 +46,12 @@ Première ligne = ces en-têtes exactement (dans cet ordre) :
 | `marque` | marque | `Renault` |
 | `modele` | modèle | `Kangoo` |
 | `type` | type de véhicule | `utilitaire` |
+| `categorie` | Pool (partagé) ou Fonction (attribué nominativement) | `Fonction` |
 | `statut` | état | `En service` |
 | `ville` | ville où se trouve le véhicule | `Lyon` |
 | `conducteur_nom` | conducteur attitré | `Julie Martin` |
 | `conducteur_email` | email du conducteur | `julie.martin@tohmo.fr` |
+| `proprietaire` | collaborateur à qui le véhicule est attribué (véhicules de fonction) | `Marc Petit` |
 | `kilometrage` | kilométrage actuel (odomètre) | `48200` |
 | `km_contrat` | kilométrage contractuel (forfait LLD) | `60000` |
 | `duree_contrat_annees` | durée du contrat, en années | `4` |
@@ -66,8 +68,11 @@ Première ligne = ces en-têtes exactement (dans cet ordre) :
 
 **Garde-fous (listes fermées) posés automatiquement par `creerOngletsVehicules()` :**
 - `type` → liste : `citadine, berline, utilitaire, suv, autre`
+- `categorie` → liste : `Pool, Fonction`
 - `statut` → liste : `En service, En maintenance, Hors service`
 - `ville` → liste : voir `VILLES_VEHICULES` dans le code (à adapter à vos vraies villes Tohmo)
+
+**Pool vs Fonction** : un véhicule Pool est partagé entre plusieurs collaborateurs (pas de `proprietaire`) ; un véhicule de Fonction est attribué nominativement, `proprietaire` porte alors le nom du collaborateur attributaire. `conducteur_nom`/`conducteur_email` restent utiles dans les deux cas (qui conduit actuellement), `proprietaire` répond à une question différente (à qui appartient l'usage du véhicule).
 
 ### Onglet `vehicules_historique`
 
@@ -114,9 +119,9 @@ Pas besoin de remplir ces onglets à la main : le code s'en charge (`ajouterEven
 
 ## 6. Ce que permet le module (interface)
 
-- **Tableau filtrable** : par statut, type, ville, plus une recherche libre (immatriculation, conducteur, ville).
-- **Colonnes affichées** : immatriculation, véhicule (marque/modèle/type), ville, conducteur, kilométrage actuel, loyer mensuel, date de fin de contrat, échéance la plus proche (CT/assurance/entretien/fin de contrat, avec code couleur), statut, et un lien direct vers le **dossier Drive dédié** du véhicule (ouvre un nouvel onglet, ne déclenche pas la fiche détail).
-- **Fiche détail (clic sur une ligne)** : tous les champs sont éditables (statut, ville, conducteur, kilométrage, kilométrage contractuel, durée du contrat, loyer, dates d'échéance, lien Drive) avec un bouton **Enregistrer les modifications**, plus un bouton **Supprimer le véhicule** (retrait définitif du parc, avec confirmation), la timeline complète, et l'ajout de commentaires.
+- **Tableau filtrable** : par catégorie (Pool / Fonction), statut, type, ville, plus une recherche libre (immatriculation, conducteur, ville, propriétaire).
+- **Colonnes affichées** : immatriculation, véhicule (marque/modèle/type), catégorie (badge Pool/Fonction), ville, conducteur, propriétaire, kilométrage actuel, loyer mensuel, date de fin de contrat, échéance la plus proche (CT/assurance/entretien/fin de contrat, avec code couleur), statut, et un lien direct vers le **dossier Drive dédié** du véhicule (ouvre un nouvel onglet, ne déclenche pas la fiche détail).
+- **Fiche détail (clic sur une ligne)** : tous les champs sont éditables (catégorie, statut, ville, conducteur, propriétaire, kilométrage, kilométrage contractuel, durée du contrat, loyer, dates d'échéance, lien Drive) avec un bouton **Enregistrer les modifications**, plus un bouton **Supprimer le véhicule** (retrait définitif du parc, avec confirmation), la timeline complète, et l'ajout de commentaires.
 - **+ Nouveau véhicule** : formulaire de création avec les mêmes champs. Le lien Drive est **facultatif** : si tu ne le renseignes pas, le sous-dossier correspondant à l'immatriculation est retrouvé (ou créé s'il n'existe pas) automatiquement dans `DOSSIER_VEHICULES_ID`.
 
 ## 7. Ce que fait chaque fonction serveur (résumé)
