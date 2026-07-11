@@ -2,6 +2,17 @@
 
 Ce dossier contient tout ce qu'il faut pour ajouter le module **Tickets** à ton projet Apps Script "HUB" existant, dans le même programme que le module Budget & Achats déjà en prod.
 
+## Contexte projet (à relire en début de nouvelle conversation)
+
+- **Maquette cible du Hub complet** (vision finale, sidebar + tableau de bord + tous les modules) : https://claude.ai/code/artifact/cd574035-7f3d-4033-965f-161211c1e137
+- **Sidebar actuelle** : icônes SVG (pas d'emoji), dans l'ordre — Tableau de bord (bientôt), Tâches (bientôt), **Tickets** (actif), **Budget & achats** (actif), Cartes, Calendrier, Mail, Véhicules, Téléphonie, Accès/Badges, Bâtiment/Sites, Assurances, Stock/Matériel, Annuaire, Checklist (tous "bientôt disponible" tant qu'ils ne sont pas construits)
+- **Architecture retenue** : un seul programme Apps Script ("HUB"), un seul `index.html` — chaque module est une `<section>` togglée en JS via la sidebar (pas de liens `?page=` en interne, ça casse — voir section 1 ci-dessous). Seul le formulaire public (`formulaire_ticket.html`, accessible par QR code sans compte Google) reste un fichier séparé routé par `doGet(e)` avec `?page=ticket`.
+- **URL de prod** : `https://script.google.com/a/macros/zeplug.com/s/AKfycbxglgtjm7BMsFcHa8jE4a83AMIucZNCUtdXhkcCMgz9hHXK3Fj4fpZsgs3gexRqF74A/exec`
+- **Sheet Budget** ("Suivi Tohmo Hub") : Sheet lié au projet Apps Script (`SpreadsheetApp.getActive()`).
+- **Sheet Tickets** ("Tohmo Hub - Tickets"), séparé : ID `1upy9uyN-g3afAEkOgpx806plCcEsL_bx75raPnsfTfI`, ouvert via `SpreadsheetApp.openById(SS_TICKETS_ID)`.
+- **Charte graphique** : voir les CSS vars en haut de `index.html` (`--bg`, `--ink`, `--lime`, `--blue`, etc.) — rainbow bar (cyan→purple→green→lime), boutons lime, coins arrondis.
+- **État actuel** : Budget + Tickets fonctionnels et testés en prod. QR code et ajustements de design encore à faire (reportés par l'utilisateur).
+
 Deux fichiers seulement :
 - `Code_ajouts_tickets.gs` → fonctions serveur à coller dans ton `Code.gs`
 - `index.html` → remplace entièrement ton fichier actuel : Budget **et** Tickets sont maintenant deux sections de la même page, affichées/masquées en JavaScript via la sidebar (aucun rechargement, aucun lien entre "pages")
