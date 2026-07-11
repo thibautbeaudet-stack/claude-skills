@@ -362,36 +362,100 @@ function getListesTickets() {
 }
 
 // ============================================================
-// MODULE VÉHICULES — données dans le Sheet principal (pas de formulaire public, pas besoin d'un Sheet séparé)
+// MODULE VÉHICULES — données dans un Sheet DÉDIÉ et SÉPARÉ (même logique que Tickets)
 // ============================================================
 
-var SITES_VEHICULES = ['Paris', 'Lyon', 'Marseille', 'Bordeaux']; // <- à adapter à vos vrais sites Tohmo
+var SS_VEHICULES_ID = '19mNkzcSMTwrl5Nx4QzApZDNTQLB2bntWl_76lRVzCYU';
+var VILLES_VEHICULES = ['Paris', 'Lyon', 'Marseille', 'Bordeaux']; // <- à adapter à vos vraies villes Tohmo
 var VEHICULE_TYPES   = ['citadine', 'berline', 'utilitaire', 'suv', 'autre'];
 var VEHICULE_STATUTS = ['En service', 'En maintenance', 'Hors service'];
 var VEHICULE_SEUIL_ALERTE_JOURS = 30;
 
-var VEHICULES_ENTETES = ['id','immatriculation','marque','modele','type','statut','site','conducteur_nom','conducteur_email','kilometrage','date_ct','date_assurance','date_entretien','notes','cree_le','cree_par','maj_le'];
+function getSSVehicules() { return SpreadsheetApp.openById(SS_VEHICULES_ID); }
+
+function getSheetVehicules(name) {
+  var sheets = getSSVehicules().getSheets();
+  var n = name.trim().toLowerCase();
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].getName().trim().toLowerCase() === n) return sheets[i];
+  }
+  throw new Error('Onglet "' + name + '" introuvable dans le Sheet Véhicules. Onglets existants : ' + sheets.map(function(s){return s.getName();}).join(', '));
+}
+
+function readSheetVehicules(name) {
+  var sh = getSheetVehicules(name), data = sh.getDataRange().getValues();
+  if (data.length < 2) return [];
+  var hdr = data[0].map(function(h){return String(h).trim().toLowerCase().replace(/\s+/g,'_');});
+  var rows = [];
+  for (var r = 1; r < data.length; r++) {
+    var obj = {};
+    for (var c = 0; c < hdr.length; c++) obj[hdr[c]] = cellVal(data[r][c]);
+    rows.push(obj);
+  }
+  return rows;
+}
+
+function appendRowVehicules(sheetName, obj) {
+  var sh = getSheetVehicules(sheetName), hdr = sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0].map(function(h){return String(h).trim().toLowerCase().replace(/\s+/g,'_');});
+  var row = hdr.map(function(h){return obj[h] !== undefined ? obj[h] : '';});
+  sh.appendRow(row);
+}
+
+function updateRowByIdVehicules(sheetName, id, updates) {
+  var sh = getSheetVehicules(sheetName), data = sh.getDataRange().getValues();
+  var hdr = data[0].map(function(h){return String(h).trim().toLowerCase().replace(/\s+/g,'_');});
+  var idCol = hdr.indexOf('id');
+  for (var r = 1; r < data.length; r++) {
+    if (String(data[r][idCol]) === String(id)) {
+      for (var key in updates) {
+        var ci = hdr.indexOf(key);
+        if (ci > -1) sh.getRange(r+1, ci+1).setValue(updates[key]);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+function deleteRowByIdVehicules(sheetName, id) {
+  var sh = getSheetVehicules(sheetName), data = sh.getDataRange().getValues();
+  var hdr = data[0].map(function(h){return String(h).trim().toLowerCase().replace(/\s+/g,'_');});
+  var idCol = hdr.indexOf('id');
+  for (var r = data.length - 1; r >= 1; r--) {
+    if (String(data[r][idCol]) === String(id)) { sh.deleteRow(r+1); return true; }
+  }
+  return false;
+}
+
+var VEHICULES_ENTETES = [
+  'id','immatriculation','marque','modele','type','statut','ville',
+  'conducteur_nom','conducteur_email',
+  'kilometrage','km_contrat','duree_contrat_annees','loyer_mensuel','date_fin_contrat',
+  'date_ct','date_assurance','date_entretien',
+  'lien_drive','notes','cree_le','cree_par','maj_le'
+];
 var VEHICULES_HISTORIQUE_ENTETES = ['id','vehicule_id','type_evenement','contenu','auteur','cree_le'];
 
 /**
- * Crée les onglets "vehicules" et "vehicules_historique" avec en-têtes + garde-fous.
- * À lancer une seule fois depuis l'éditeur Apps Script (sélectionner cette fonction puis ▶ Exécuter).
+ * Crée les onglets "vehicules" et "vehicules_historique" DANS LE SHEET DÉDIÉ (SS_VEHICULES_ID)
+ * avec en-têtes + garde-fous. À lancer une seule fois depuis l'éditeur Apps Script.
  * Sûr à relancer plusieurs fois : ne recrée pas les onglets s'ils existent déjà.
  */
 function creerOngletsVehicules() {
+  var ss = getSSVehicules();
   var creees = [];
 
-  var shVeh = SS.getSheetByName('vehicules');
+  var shVeh = ss.getSheetByName('vehicules');
   if (!shVeh) {
-    shVeh = SS.insertSheet('vehicules');
+    shVeh = ss.insertSheet('vehicules');
     shVeh.getRange(1, 1, 1, VEHICULES_ENTETES.length).setValues([VEHICULES_ENTETES]).setFontWeight('bold');
     shVeh.setFrozenRows(1);
     creees.push('vehicules');
   }
 
-  var shHist = SS.getSheetByName('vehicules_historique');
+  var shHist = ss.getSheetByName('vehicules_historique');
   if (!shHist) {
-    shHist = SS.insertSheet('vehicules_historique');
+    shHist = ss.insertSheet('vehicules_historique');
     shHist.getRange(1, 1, 1, VEHICULES_HISTORIQUE_ENTETES.length).setValues([VEHICULES_HISTORIQUE_ENTETES]).setFontWeight('bold');
     shHist.setFrozenRows(1);
     creees.push('vehicules_historique');
@@ -401,17 +465,17 @@ function creerOngletsVehicules() {
   var rows = Math.max(shVeh.getMaxRows() - 1, 200);
   shVeh.getRange(2, VEHICULES_ENTETES.indexOf('type') + 1, rows, 1).setDataValidation(dv(VEHICULE_TYPES));
   shVeh.getRange(2, VEHICULES_ENTETES.indexOf('statut') + 1, rows, 1).setDataValidation(dv(VEHICULE_STATUTS));
-  shVeh.getRange(2, VEHICULES_ENTETES.indexOf('site') + 1, rows, 1).setDataValidation(dv(SITES_VEHICULES));
+  shVeh.getRange(2, VEHICULES_ENTETES.indexOf('ville') + 1, rows, 1).setDataValidation(dv(VILLES_VEHICULES));
 
   var msg = creees.length
-    ? 'Onglets créés : ' + creees.join(', ') + '. Garde-fous (type/statut/site) posés.'
-    : 'Les onglets existaient déjà — garde-fous (type/statut/site) réappliqués.';
+    ? 'Onglets créés dans le Sheet Véhicules : ' + creees.join(', ') + '. Garde-fous (type/statut/ville) posés.'
+    : 'Les onglets existaient déjà — garde-fous (type/statut/ville) réappliqués.';
   Logger.log(msg);
   return msg;
 }
 
 function getVehicules() {
-  var rows = readSheet('vehicules');
+  var rows = readSheetVehicules('vehicules');
   rows.forEach(function (v) { v.alerte = calculerAlerteVehicule(v); });
   rows.sort(function (a, b) { return String(a.immatriculation).localeCompare(String(b.immatriculation)); });
   return rows;
@@ -425,18 +489,21 @@ function getVehicule(id) {
 }
 
 function getHistoriqueVehicule(id) {
-  var rows = readSheet('vehicules_historique').filter(function (r) { return String(r.vehicule_id) === String(id); });
+  var rows = readSheetVehicules('vehicules_historique').filter(function (r) { return String(r.vehicule_id) === String(id); });
   rows.sort(function (a, b) { return String(a.cree_le).localeCompare(String(b.cree_le)); });
   return rows;
 }
 
 function getStatsVehicules() {
   var rows = getVehicules();
+  var loyerTotal = 0;
+  rows.forEach(function (v) { loyerTotal += Number(v.loyer_mensuel) || 0; });
   return {
     total: rows.length,
     enService: rows.filter(function (v) { return v.statut === 'En service'; }).length,
     enMaintenance: rows.filter(function (v) { return v.statut === 'En maintenance'; }).length,
-    alertes: rows.filter(function (v) { return v.alerte.niveau !== 'ok'; }).length
+    alertes: rows.filter(function (v) { return v.alerte.niveau !== 'ok'; }).length,
+    loyerTotalMensuel: loyerTotal
   };
 }
 
@@ -444,7 +511,8 @@ function calculerAlerteVehicule(v) {
   var echeances = [
     { label: 'Contrôle technique', date: v.date_ct },
     { label: 'Assurance', date: v.date_assurance },
-    { label: 'Entretien', date: v.date_entretien }
+    { label: 'Entretien', date: v.date_entretien },
+    { label: 'Fin de contrat', date: v.date_fin_contrat }
   ].filter(function (e) { return !!e.date; });
 
   var pire = { niveau: 'ok', libelle: 'À jour' };
@@ -473,20 +541,25 @@ function parseDateFrVehicules(s) {
 
 function addVehicule(data) {
   var id = uid('VEH');
-  appendRow('vehicules', {
+  appendRowVehicules('vehicules', {
     id: id,
     immatriculation: data.immatriculation || '',
     marque: data.marque || '',
     modele: data.modele || '',
     type: data.type || 'autre',
     statut: 'En service',
-    site: data.site || '',
+    ville: data.ville || '',
     conducteur_nom: data.conducteur_nom || '',
     conducteur_email: data.conducteur_email || '',
     kilometrage: data.kilometrage || 0,
+    km_contrat: data.km_contrat || 0,
+    duree_contrat_annees: data.duree_contrat_annees || '',
+    loyer_mensuel: data.loyer_mensuel || 0,
+    date_fin_contrat: data.date_fin_contrat || '',
     date_ct: data.date_ct || '',
     date_assurance: data.date_assurance || '',
     date_entretien: data.date_entretien || '',
+    lien_drive: data.lien_drive || '',
     notes: '',
     cree_le: nowStr(),
     cree_par: who(),
@@ -498,30 +571,30 @@ function addVehicule(data) {
 
 function majStatutVehicule(id, statut, commentaire) {
   if (VEHICULE_STATUTS.indexOf(statut) === -1) throw new Error('Statut inconnu : ' + statut);
-  updateRowById('vehicules', id, { statut: statut, maj_le: nowStr() });
+  updateRowByIdVehicules('vehicules', id, { statut: statut, maj_le: nowStr() });
   ajouterEvenementVehicule(id, 'changement_statut', 'Statut changé en « ' + statut + ' »' + (commentaire ? ' — ' + commentaire : ''), who());
   return true;
 }
 
 function majVehicule(id, updates) {
   updates.maj_le = nowStr();
-  updateRowById('vehicules', id, updates);
+  updateRowByIdVehicules('vehicules', id, updates);
   return true;
 }
 
 function addCommentaireVehicule(id, texte) {
   if (!texte || !texte.trim()) throw new Error('Commentaire vide');
-  updateRowById('vehicules', id, { maj_le: nowStr() });
+  updateRowByIdVehicules('vehicules', id, { maj_le: nowStr() });
   ajouterEvenementVehicule(id, 'commentaire', texte.trim(), who());
   return true;
 }
 
 function supprimerVehicule(id) {
-  return deleteRowById('vehicules', id);
+  return deleteRowByIdVehicules('vehicules', id);
 }
 
 function ajouterEvenementVehicule(vehiculeId, type, contenu, auteur) {
-  appendRow('vehicules_historique', {
+  appendRowVehicules('vehicules_historique', {
     id: uid('EVT'),
     vehicule_id: vehiculeId,
     type_evenement: type,
@@ -533,7 +606,7 @@ function ajouterEvenementVehicule(vehiculeId, type, contenu, auteur) {
 
 function getListesVehicules() {
   return {
-    sites: SITES_VEHICULES,
+    villes: VILLES_VEHICULES,
     types: VEHICULE_TYPES,
     statuts: VEHICULE_STATUTS
   };

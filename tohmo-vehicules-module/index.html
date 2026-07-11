@@ -450,12 +450,15 @@
             <option value="suv">SUV</option>
             <option value="autre">Autre</option>
           </select>
-          <input type="text" id="v-fRecherche" placeholder="Rechercher (immatriculation, conducteur, site...)" oninput="Vehicules.render()">
+          <select id="v-fVille" onchange="Vehicules.render()">
+            <option value="">Toutes les villes</option>
+          </select>
+          <input type="text" id="v-fRecherche" placeholder="Rechercher (immatriculation, conducteur, ville...)" oninput="Vehicules.render()">
         </div>
 
         <div class="tbl-wrap">
           <table class="v-table">
-            <thead><tr><th>Immatriculation</th><th>Véhicule</th><th>Conducteur</th><th>Site</th><th>Km</th><th>Échéances</th><th>Statut</th></tr></thead>
+            <thead><tr><th>Immatriculation</th><th>Véhicule</th><th>Ville</th><th>Conducteur</th><th>Km</th><th>Loyer /mois</th><th>Fin de contrat</th><th>Échéances</th><th>Statut</th><th></th></tr></thead>
             <tbody id="v-tbody"></tbody>
           </table>
         </div>
@@ -473,6 +476,7 @@
 </div>
 
 <datalist id="frn-list"></datalist>
+<datalist id="villes-list"></datalist>
 <div id="toast"></div>
 
 <script>
@@ -508,9 +512,9 @@
     ],
     ticketsHist:{},
     vehicules:[
-      { id:'VEH-20260601-201', immatriculation:'AB-123-CD', marque:'Renault', modele:'Kangoo', type:'utilitaire', statut:'En service', site:'Lyon', conducteur_nom:'Julie Martin', conducteur_email:'julie.martin@tohmo.fr', kilometrage:48200, date_ct:'12/08/2026', date_assurance:'01/01/2027', date_entretien:'20/09/2026', notes:'', cree_le:'01/06/2026 09:00', cree_par:'office@tohmo.fr' },
-      { id:'VEH-20260405-118', immatriculation:'EF-456-GH', marque:'Peugeot', modele:'308', type:'berline', statut:'En service', site:'Paris', conducteur_nom:'Marc Petit', conducteur_email:'marc.petit@tohmo.fr', kilometrage:112500, date_ct:'25/07/2026', date_assurance:'15/03/2027', date_entretien:'10/07/2026', notes:'', cree_le:'05/04/2026 09:00', cree_par:'office@tohmo.fr' },
-      { id:'VEH-20260112-057', immatriculation:'IJ-789-KL', marque:'Citroën', modele:'Berlingo', type:'utilitaire', statut:'En maintenance', site:'Marseille', conducteur_nom:'Sarah Dupont', conducteur_email:'sarah.dupont@tohmo.fr', kilometrage:87340, date_ct:'02/10/2026', date_assurance:'01/06/2027', date_entretien:'01/07/2026', notes:'Bruit suspect au freinage, en atelier.', cree_le:'12/01/2026 09:00', cree_par:'office@tohmo.fr' }
+      { id:'VEH-20260601-201', immatriculation:'AB-123-CD', marque:'Renault', modele:'Kangoo', type:'utilitaire', statut:'En service', ville:'Lyon', conducteur_nom:'Julie Martin', conducteur_email:'julie.martin@tohmo.fr', kilometrage:48200, km_contrat:60000, duree_contrat_annees:4, loyer_mensuel:320, date_fin_contrat:'01/06/2028', date_ct:'12/08/2026', date_assurance:'01/01/2027', date_entretien:'20/09/2026', lien_drive:'https://drive.google.com/drive/folders/exemple-ab123cd', notes:'', cree_le:'01/06/2026 09:00', cree_par:'office@tohmo.fr' },
+      { id:'VEH-20260405-118', immatriculation:'EF-456-GH', marque:'Peugeot', modele:'308', type:'berline', statut:'En service', ville:'Paris', conducteur_nom:'Marc Petit', conducteur_email:'marc.petit@tohmo.fr', kilometrage:112500, km_contrat:120000, duree_contrat_annees:3, loyer_mensuel:410, date_fin_contrat:'05/04/2027', date_ct:'25/07/2026', date_assurance:'15/03/2027', date_entretien:'10/07/2026', lien_drive:'https://drive.google.com/drive/folders/exemple-ef456gh', notes:'', cree_le:'05/04/2026 09:00', cree_par:'office@tohmo.fr' },
+      { id:'VEH-20260112-057', immatriculation:'IJ-789-KL', marque:'Citroën', modele:'Berlingo', type:'utilitaire', statut:'En maintenance', ville:'Marseille', conducteur_nom:'Sarah Dupont', conducteur_email:'sarah.dupont@tohmo.fr', kilometrage:87340, km_contrat:90000, duree_contrat_annees:5, loyer_mensuel:275, date_fin_contrat:'12/01/2031', date_ct:'02/10/2026', date_assurance:'01/06/2027', date_entretien:'01/07/2026', lien_drive:'https://drive.google.com/drive/folders/exemple-ij789kl', notes:'Bruit suspect au freinage, en atelier.', cree_le:'12/01/2026 09:00', cree_par:'office@tohmo.fr' }
     ],
     vehiculesHist:{}
   };
@@ -528,7 +532,7 @@
   function monthOf(d){var p=String(d||'').split('/');return p.length>=2?parseInt(p[1],10):0;}
   function parseDateFr(s){var m=String(s||'').match(/(\d{2})\/(\d{2})\/(\d{4})/);return m?new Date(Number(m[3]),Number(m[2])-1,Number(m[1])):null;}
   function calcAlerteVehiculeMock(v){
-    var echeances=[['Contrôle technique',v.date_ct],['Assurance',v.date_assurance],['Entretien',v.date_entretien]];
+    var echeances=[['Contrôle technique',v.date_ct],['Assurance',v.date_assurance],['Entretien',v.date_entretien],['Fin de contrat',v.date_fin_contrat]];
     var pire={niveau:'ok',libelle:'À jour'},now=new Date();
     echeances.forEach(function(e){
       var d=parseDateFr(e[1]);if(!d)return;
@@ -571,7 +575,8 @@
       }
       else if(fn==='getStatsVehicules'){
         var rowsV=MOCK.vehicules.map(function(v){var c=Object.assign({},v);c.alerte=calcAlerteVehiculeMock(c);return c;});
-        cb({total:rowsV.length,enService:rowsV.filter(function(v){return v.statut==='En service';}).length,enMaintenance:rowsV.filter(function(v){return v.statut==='En maintenance';}).length,alertes:rowsV.filter(function(v){return v.alerte.niveau!=='ok';}).length});
+        var loyerTotal=0;rowsV.forEach(function(v){loyerTotal+=Number(v.loyer_mensuel)||0;});
+        cb({total:rowsV.length,enService:rowsV.filter(function(v){return v.statut==='En service';}).length,enMaintenance:rowsV.filter(function(v){return v.statut==='En maintenance';}).length,alertes:rowsV.filter(function(v){return v.alerte.niveau!=='ok';}).length,loyerTotalMensuel:loyerTotal});
       }
       else if(fn==='getVehicule'){
         var veh=MOCK.vehicules.filter(function(r){return r.id===a[0];})[0];
@@ -583,6 +588,7 @@
       else if(fn==='majVehicule'){var veh=MOCK.vehicules.filter(function(r){return r.id===a[0];})[0];Object.assign(veh,a[1]);cb(true);}
       else if(fn==='addCommentaireVehicule'){var idv=a[0];MOCK.vehiculesHist[idv]=MOCK.vehiculesHist[idv]||[];MOCK.vehiculesHist[idv].push({cree_le:'maintenant',auteur:'moi',contenu:a[1]});cb(true);}
       else if(fn==='addVehicule'){var id3='VEH-MOCK-'+Math.floor(Math.random()*900+100);MOCK.vehicules.unshift(Object.assign({id:id3,statut:'En service',notes:'',cree_le:'maintenant',cree_par:'moi'},a[0]));cb(id3);}
+      else if(fn==='supprimerVehicule'){MOCK.vehicules=MOCK.vehicules.filter(function(v){return v.id!==a[0];});cb(true);}
       else cb('ok');
     }
   }
@@ -1036,8 +1042,15 @@
     function escHtml(s){ var d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
 
     function charger() {
-      srv('getVehicules', [], function(rows){ STATE.vehicules = rows; render(); });
+      srv('getVehicules', [], function(rows){ STATE.vehicules = rows; populateVilles(); render(); });
       srv('getStatsVehicules', [], function(s){ STATE.stats = s; renderStats(); });
+    }
+
+    function populateVilles() {
+      var cur = $('v-fVille').value;
+      var villes = Array.from(new Set(STATE.vehicules.map(function(v){return v.ville;}).filter(Boolean))).sort();
+      $('v-fVille').innerHTML = '<option value="">Toutes les villes</option>' + villes.map(function(ville){return '<option'+(ville===cur?' selected':'')+'>'+escHtml(ville)+'</option>';}).join('');
+      $('villes-list').innerHTML = villes.map(function(ville){return '<option value="'+escHtml(ville)+'">';}).join('');
     }
 
     function renderStats() {
@@ -1046,7 +1059,7 @@
         stat(s.enService, 'En service'),
         stat(s.total, 'Total véhicules'),
         stat(s.alertes, 'Échéances à surveiller'),
-        stat(s.enMaintenance, 'En maintenance')
+        stat(euro(s.loyerTotalMensuel), 'Loyer total / mois')
       ].join('');
     }
     function stat(n, l) { return '<div class="stat"><div class="stat-v">'+n+'</div><div class="stat-l">'+l+'</div></div>'; }
@@ -1054,13 +1067,15 @@
     function render() {
       var fs = $('v-fStatut').value;
       var ft = $('v-fType').value;
+      var fv = $('v-fVille').value;
       var fr = $('v-fRecherche').value.trim().toLowerCase();
 
       var rows = STATE.vehicules.filter(function(v){
         if (fs && v.statut !== fs) return false;
         if (ft && v.type !== ft) return false;
+        if (fv && v.ville !== fv) return false;
         if (fr) {
-          var blob = [v.immatriculation,v.marque,v.modele,v.conducteur_nom,v.conducteur_email,v.site].join(' ').toLowerCase();
+          var blob = [v.immatriculation,v.marque,v.modele,v.conducteur_nom,v.conducteur_email,v.ville].join(' ').toLowerCase();
           if (blob.indexOf(fr) === -1) return false;
         }
         return true;
@@ -1068,20 +1083,24 @@
 
       var tbody = $('v-tbody');
       if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="7" class="muted">Aucun véhicule ne correspond à ces filtres.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="muted">Aucun véhicule ne correspond à ces filtres.</td></tr>';
         return;
       }
       tbody.innerHTML = rows.map(function(v){
         var stCls = { 'En service':'b-green', 'En maintenance':'b-amber', 'Hors service':'b-grey' }[v.statut] || 'b-grey';
         var alCls = ALERTE_CLS[v.alerte.niveau] || 'b-grey';
+        var drive = v.lien_drive ? '<a class="lnk" href="'+esc(v.lien_drive)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Drive</a>' : '<span class="muted">—</span>';
         return '<tr onclick="Vehicules.ouvrirDrawer(\''+v.id+'\')">'
           + '<td>'+escHtml(v.immatriculation)+'</td>'
           + '<td>'+ escHtml(v.marque) + ' ' + escHtml(v.modele) + ' <span class="t-src">('+(TYPE_LABELS[v.type]||v.type)+')</span></td>'
+          + '<td>'+ escHtml(v.ville||'—') +'</td>'
           + '<td>'+ escHtml(v.conducteur_nom||'—') +'</td>'
-          + '<td>'+ escHtml(v.site||'—') +'</td>'
           + '<td>'+ (v.kilometrage!=null && v.kilometrage!=='' ? Number(v.kilometrage).toLocaleString('fr-FR')+' km' : '—') +'</td>'
+          + '<td>'+ (v.loyer_mensuel ? euro(v.loyer_mensuel) : '—') +'</td>'
+          + '<td>'+ escHtml(v.date_fin_contrat||'—') +'</td>'
           + '<td><span class="badge '+alCls+'">'+escHtml(v.alerte.libelle)+'</span></td>'
           + '<td><span class="badge '+stCls+'">'+v.statut+'</span></td>'
+          + '<td>'+drive+'</td>'
           + '</tr>';
       }).join('');
     }
@@ -1100,33 +1119,50 @@
       }).join('') || '<div class="v-tl-item"><div class="content" style="color:var(--mute)">Aucun évènement</div></div>';
 
       var alCls = ALERTE_CLS[v.alerte.niveau] || 'b-grey';
+      var drive = v.lien_drive
+        ? '<a class="lnk" href="'+esc(v.lien_drive)+'" target="_blank" rel="noopener">Ouvrir le dossier Drive</a>'
+        : '<span class="muted">Aucun dossier Drive renseigné</span>';
 
       return ''
         + '<button class="v-close-x" type="button" onclick="Vehicules.fermerDrawer()">×</button>'
         + '<h2>'+escHtml(v.immatriculation)+'</h2>'
         + '<div class="sub"><span class="badge b-purple">'+(TYPE_LABELS[v.type]||v.type)+'</span> · '+escHtml(v.marque)+' '+escHtml(v.modele)+' · créé le '+v.cree_le+'</div>'
+        + '<div class="v-field-row" style="margin-top:10px"><div><label>Dossier Drive</label>'+drive+'</div><div><label>Échéance la plus proche</label><span class="badge '+alCls+'">'+escHtml(v.alerte.libelle)+'</span></div></div>'
 
         + '<div class="v-field-row" style="margin-top:14px">'
-          + '<div><label>Statut</label><select id="v-drawStatut">'
+          + '<div><label>Statut</label><select id="v-eStatut">'
             + ['En service','En maintenance','Hors service'].map(function(s){return '<option '+(s===v.statut?'selected':'')+'>'+s+'</option>';}).join('')
           + '</select></div>'
-          + '<div><label>Kilométrage</label><input type="number" id="v-drawKm" value="'+(v.kilometrage||0)+'"></div>'
+          + '<div><label>Ville</label><input type="text" id="v-eVille" list="villes-list" value="'+esc(v.ville||'')+'"></div>'
         + '</div>'
-        + '<button class="v-btn" type="button" onclick="Vehicules.appliquerStatut(\''+v.id+'\')" style="margin-bottom:16px">Mettre à jour</button>'
+        + '<div class="v-field-row">'
+          + '<div><label>Conducteur</label><input type="text" id="v-eConducteur" value="'+esc(v.conducteur_nom||'')+'"></div>'
+          + '<div><label>Email conducteur</label><input type="email" id="v-eEmail" value="'+esc(v.conducteur_email||'')+'"></div>'
+        + '</div>'
+        + '<div class="v-field-row">'
+          + '<div><label>Kilométrage actuel</label><input type="number" id="v-eKm" value="'+(v.kilometrage||0)+'"></div>'
+          + '<div><label>Kilométrage contractuel</label><input type="number" id="v-eKmContrat" value="'+(v.km_contrat||0)+'"></div>'
+        + '</div>'
+        + '<div class="v-field-row">'
+          + '<div><label>Loyer mensuel (€)</label><input type="number" step="0.01" id="v-eLoyer" value="'+(v.loyer_mensuel||0)+'"></div>'
+          + '<div><label>Durée du contrat (années)</label><input type="number" id="v-eDuree" value="'+(v.duree_contrat_annees||'')+'"></div>'
+        + '</div>'
+        + '<div class="v-field-row">'
+          + '<div><label>Fin de contrat (jj/mm/aaaa)</label><input type="text" id="v-eFinContrat" value="'+esc(v.date_fin_contrat||'')+'"></div>'
+        + '</div>'
+        + '<div class="v-field-row">'
+          + '<div><label>Contrôle technique</label><input type="text" id="v-eCt" value="'+esc(v.date_ct||'')+'"></div>'
+          + '<div><label>Assurance</label><input type="text" id="v-eAssurance" value="'+esc(v.date_assurance||'')+'"></div>'
+          + '<div><label>Prochain entretien</label><input type="text" id="v-eEntretien" value="'+esc(v.date_entretien||'')+'"></div>'
+        + '</div>'
+        + '<div class="v-field-row">'
+          + '<div><label>Lien du dossier Drive</label><input type="text" id="v-eDrive" placeholder="https://drive.google.com/..." value="'+esc(v.lien_drive||'')+'"></div>'
+        + '</div>'
+        + '<div style="display:flex;gap:10px;margin-bottom:16px;">'
+          + '<button class="v-btn" type="button" onclick="Vehicules.enregistrer(\''+v.id+'\')">Enregistrer les modifications</button>'
+          + '<button class="v-btn-ghost" type="button" onclick="Vehicules.supprimer(\''+v.id+'\')" style="color:var(--ri)">Supprimer le véhicule</button>'
+        + '</div>'
 
-        + '<div class="v-field-row">'
-          + '<div><label>Site</label>'+escHtml(v.site||'—')+'</div>'
-          + '<div><label>Échéance la plus proche</label><span class="badge '+alCls+'">'+escHtml(v.alerte.libelle)+'</span></div>'
-        + '</div>'
-        + '<div class="v-field-row">'
-          + '<div><label>Conducteur</label>'+escHtml(v.conducteur_nom||'—')+'</div>'
-          + '<div><label>Email</label>'+escHtml(v.conducteur_email||'—')+'</div>'
-        + '</div>'
-        + '<div class="v-field-row">'
-          + '<div><label>Contrôle technique</label>'+escHtml(v.date_ct||'—')+'</div>'
-          + '<div><label>Assurance</label>'+escHtml(v.date_assurance||'—')+'</div>'
-          + '<div><label>Prochain entretien</label>'+escHtml(v.date_entretien||'—')+'</div>'
-        + '</div>'
         + (v.notes ? '<div class="v-box">'+escHtml(v.notes)+'</div>' : '')
 
         + '<h3 style="font-size:14px;margin:20px 0 4px;">Timeline</h3>'
@@ -1137,14 +1173,35 @@
         + '<button class="v-btn" type="button" style="margin-top:8px" onclick="Vehicules.envoyerCommentaire(\''+v.id+'\')">Ajouter</button>';
     }
 
-    function appliquerStatut(id) {
-      var statut = $('v-drawStatut').value;
-      var km = $('v-drawKm').value;
+    function enregistrer(id) {
+      var statut = $('v-eStatut').value;
+      var updates = {
+        ville: $('v-eVille').value.trim(),
+        conducteur_nom: $('v-eConducteur').value.trim(),
+        conducteur_email: $('v-eEmail').value.trim(),
+        kilometrage: Number($('v-eKm').value)||0,
+        km_contrat: Number($('v-eKmContrat').value)||0,
+        loyer_mensuel: Number($('v-eLoyer').value)||0,
+        duree_contrat_annees: $('v-eDuree').value.trim(),
+        date_fin_contrat: $('v-eFinContrat').value.trim(),
+        date_ct: $('v-eCt').value.trim(),
+        date_assurance: $('v-eAssurance').value.trim(),
+        date_entretien: $('v-eEntretien').value.trim(),
+        lien_drive: $('v-eDrive').value.trim()
+      };
       srv('majStatutVehicule', [id, statut, ''], function(){
-        srv('majVehicule', [id, {kilometrage: Number(km)||0}], function(){
+        srv('majVehicule', [id, updates], function(){
           toast('Véhicule mis à jour');
           ouvrirDrawer(id);
         });
+      });
+    }
+
+    function supprimer(id) {
+      if (!window.confirm('Retirer définitivement ce véhicule du parc ?')) return;
+      srv('supprimerVehicule', [id], function(){
+        toast('Véhicule supprimé');
+        fermerDrawer();
       });
     }
 
@@ -1167,12 +1224,17 @@
           + '<option value="citadine">Citadine</option><option value="berline">Berline</option>'
           + '<option value="utilitaire">Utilitaire</option><option value="suv">SUV</option><option value="autre">Autre</option>'
         + '</select></div>'
-        + '<div class="v-form-row"><label>Site</label><input type="text" id="v-nSite"></div>'
+        + '<div class="v-form-row"><label>Ville</label><input type="text" id="v-nVille" list="villes-list"></div>'
         + '<div class="v-form-row"><label>Nom du conducteur</label><input type="text" id="v-nConducteur"></div>'
         + '<div class="v-form-row"><label>Email du conducteur</label><input type="email" id="v-nEmail"></div>'
-        + '<div class="v-form-row"><label>Kilométrage</label><input type="number" id="v-nKm" value="0"></div>'
+        + '<div class="v-form-row"><label>Kilométrage actuel</label><input type="number" id="v-nKm" value="0"></div>'
+        + '<div class="v-form-row"><label>Kilométrage contractuel</label><input type="number" id="v-nKmContrat" value="0"></div>'
+        + '<div class="v-form-row"><label>Loyer mensuel (€)</label><input type="number" step="0.01" id="v-nLoyer" value="0"></div>'
+        + '<div class="v-form-row"><label>Durée du contrat (années)</label><input type="number" id="v-nDuree"></div>'
+        + '<div class="v-form-row"><label>Fin de contrat (jj/mm/aaaa)</label><input type="text" id="v-nFinContrat" placeholder="jj/mm/aaaa"></div>'
         + '<div class="v-form-row"><label>Contrôle technique (jj/mm/aaaa)</label><input type="text" id="v-nCt" placeholder="jj/mm/aaaa"></div>'
         + '<div class="v-form-row"><label>Assurance (jj/mm/aaaa)</label><input type="text" id="v-nAssurance" placeholder="jj/mm/aaaa"></div>'
+        + '<div class="v-form-row"><label>Lien du dossier Drive</label><input type="text" id="v-nDrive" placeholder="https://drive.google.com/..."></div>'
         + '<div id="v-nErr" class="v-err"></div>'
         + '<div style="display:flex;gap:10px;margin-top:14px;">'
           + '<button class="v-btn" type="button" onclick="Vehicules.creerVehicule()">Créer</button>'
@@ -1188,12 +1250,17 @@
         marque: $('v-nMarque').value.trim(),
         modele: $('v-nModele').value.trim(),
         type: $('v-nType').value,
-        site: $('v-nSite').value.trim(),
+        ville: $('v-nVille').value.trim(),
         conducteur_nom: $('v-nConducteur').value.trim(),
         conducteur_email: $('v-nEmail').value.trim(),
         kilometrage: Number($('v-nKm').value)||0,
+        km_contrat: Number($('v-nKmContrat').value)||0,
+        loyer_mensuel: Number($('v-nLoyer').value)||0,
+        duree_contrat_annees: $('v-nDuree').value.trim(),
+        date_fin_contrat: $('v-nFinContrat').value.trim(),
         date_ct: $('v-nCt').value.trim(),
-        date_assurance: $('v-nAssurance').value.trim()
+        date_assurance: $('v-nAssurance').value.trim(),
+        lien_drive: $('v-nDrive').value.trim()
       };
       if (!data.immatriculation) { $('v-nErr').textContent = 'L\'immatriculation est obligatoire.'; return; }
       srv('addVehicule', [data], function(){
@@ -1205,7 +1272,7 @@
 
     return {
       charger: charger, render: render, ouvrirDrawer: ouvrirDrawer, fermerDrawer: fermerDrawer,
-      appliquerStatut: appliquerStatut, envoyerCommentaire: envoyerCommentaire,
+      enregistrer: enregistrer, supprimer: supprimer, envoyerCommentaire: envoyerCommentaire,
       ouvrirModalNouveau: ouvrirModalNouveau, fermerModalNouveau: fermerModalNouveau, creerVehicule: creerVehicule
     };
   })();
