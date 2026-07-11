@@ -14,10 +14,21 @@
     *{box-sizing:border-box;}
     body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);}
     .rainbow{height:6px;width:100%;background:linear-gradient(90deg,var(--blue),#B86FF0,#A1FF71,var(--lime));}
+
+    /* ── Sidebar (commune à tous les modules) ── */
+    .shell{display:flex;align-items:stretch;min-height:calc(100vh - 6px);}
+    .sidebar{width:64px;flex:0 0 64px;background:var(--bg);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:6px;}
+    .sidebar .logo{width:34px;height:34px;border-radius:10px;background:var(--lime);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;}
+    .sidebar a,.sidebar .icon-btn{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;text-decoration:none;color:var(--soft);cursor:pointer;flex-shrink:0;}
+    .sidebar a:hover{background:var(--inset);}
+    .sidebar a.active{background:var(--ink);color:#fff;}
+    .sidebar .icon-btn.disabled{opacity:.32;cursor:default;}
+    .sidebar .spacer{flex:1;}
+    .sidebar .avatar{width:32px;height:32px;border-radius:50%;background:var(--pt);color:var(--pi);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:6px;flex-shrink:0;}
+    .content{flex:1;min-width:0;}
+
     header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:12px;}
     header h1{font-size:20px;margin:0;}
-    header .back{font-size:13px;color:var(--soft);text-decoration:none;}
-    header .back:hover{color:var(--ink);}
     .actions{display:flex;gap:10px;}
     button{font-family:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line2);background:var(--bg);color:var(--ink);padding:9px 14px;font-size:14px;}
     button.primary{background:var(--lime);border-color:var(--lime);color:var(--ink);font-weight:600;}
@@ -87,9 +98,30 @@
 </head>
 <body>
   <div class="rainbow"></div>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="logo">⚡</div>
+      <div class="icon-btn disabled" title="Tableau de bord — bientôt disponible">▦</div>
+      <div class="icon-btn disabled" title="Tâches — bientôt disponible">📋</div>
+      <a href="?page=tickets" class="active" title="Tickets">🎫</a>
+      <a href="?" title="Budget & achats">💰</a>
+      <div class="icon-btn disabled" title="Cartes — bientôt disponible">💳</div>
+      <div class="icon-btn disabled" title="Calendrier — bientôt disponible">📅</div>
+      <div class="icon-btn disabled" title="Mail — bientôt disponible">✉️</div>
+      <div class="icon-btn disabled" title="Véhicules — bientôt disponible">🚗</div>
+      <div class="icon-btn disabled" title="Téléphonie — bientôt disponible">📱</div>
+      <div class="icon-btn disabled" title="Accès / Badges — bientôt disponible">🔒</div>
+      <div class="icon-btn disabled" title="Bâtiment / Sites — bientôt disponible">🏢</div>
+      <div class="icon-btn disabled" title="Assurances — bientôt disponible">🛡️</div>
+      <div class="icon-btn disabled" title="Stock / Matériel — bientôt disponible">📦</div>
+      <div class="icon-btn disabled" title="Annuaire — bientôt disponible">👥</div>
+      <div class="icon-btn disabled" title="Checklist — bientôt disponible">✔️</div>
+      <div class="spacer"></div>
+      <div class="avatar">TB</div>
+    </aside>
+    <div class="content">
   <header>
     <div>
-      <a class="back" href="?">← Retour au Hub</a>
       <h1>🎫 Tickets</h1>
     </div>
     <div class="actions">
@@ -124,6 +156,8 @@
       <tbody id="tbody"></tbody>
     </table>
   </main>
+    </div>
+  </div>
 
   <!-- Drawer détail -->
   <div class="overlay" id="drawerOverlay" onclick="if(event.target===this) fermerDrawer()">
