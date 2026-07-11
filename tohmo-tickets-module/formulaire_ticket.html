@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nouvelle demande — Tohmo</title>
+  <style>
+    :root{
+      --bg:#FFFFFF;--inset:#F3F2ED;--ink:#111110;--soft:#57564F;--mute:#8E8D84;
+      --line:#E7E5DC;--line2:#D7D5CA;--lime:#DFFF36;--blue:#24D7FF;
+      --gi:#356B12;--gt:#E9FBDF;--ri:#A62521;--rt:#FBE4E4;--ai:#7A5A00;--at:#FFF6D6;--bi:#0A6076;--bt:#E7FBFF;--pi:#6B2F9E;--pt:#F1E2FC;
+    }
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);}
+    .rainbow{height:6px;width:100%;background:linear-gradient(90deg,var(--blue),#B86FF0,#A1FF71,var(--lime));}
+    .wrap{max-width:480px;margin:0 auto;padding:28px 20px 60px;}
+    h1{font-size:20px;margin:6px 0 2px;}
+    .sub{color:var(--soft);font-size:14px;margin-bottom:22px;}
+    .steps{display:flex;gap:6px;margin-bottom:22px;}
+    .steps div{flex:1;height:4px;border-radius:2px;background:var(--line);}
+    .steps div.on{background:var(--lime);}
+
+    .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .type-card{border:1px solid var(--line2);border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;background:var(--bg);}
+    .type-card:hover{border-color:var(--ink);}
+    .type-card.selected{border-color:var(--lime);background:var(--inset);box-shadow:0 0 0 2px var(--lime) inset;}
+    .type-card .ico{font-size:26px;display:block;margin-bottom:8px;}
+    .type-card .lbl{font-size:14px;font-weight:600;}
+
+    .form-row{margin-bottom:16px;}
+    .form-row label{display:block;font-size:13px;color:var(--soft);margin-bottom:6px;}
+    input[type=text],input[type=email],select,textarea{width:100%;font-family:inherit;font-size:16px;padding:12px;border-radius:10px;border:1px solid var(--line2);background:var(--bg);color:var(--ink);}
+    textarea{min-height:100px;resize:vertical;}
+    input[type=file]{width:100%;font-size:14px;}
+
+    .actions{display:flex;gap:10px;margin-top:24px;}
+    button{font-family:inherit;cursor:pointer;border-radius:12px;border:1px solid var(--line2);background:var(--bg);color:var(--ink);padding:13px 18px;font-size:15px;flex:1;}
+    button.primary{background:var(--lime);border-color:var(--lime);font-weight:700;}
+    button.primary:disabled{opacity:.5;cursor:not-allowed;}
+    button.ghost{background:transparent;border-color:transparent;color:var(--soft);flex:0 0 auto;}
+
+    .confirm{text-align:center;padding:40px 10px;}
+    .confirm .check{font-size:46px;margin-bottom:10px;}
+    .confirm .id{font-family:monospace;background:var(--inset);border-radius:10px;padding:10px 14px;display:inline-block;margin:14px 0;font-size:15px;}
+    .err{color:var(--ri);font-size:13px;margin-top:6px;}
+    #screen{display:none;}
+    #screen.on{display:block;}
+  </style>
+</head>
+<body>
+  <div class="rainbow"></div>
+  <div class="wrap">
+    <h1>Nouvelle demande</h1>
+    <div class="sub">Office Hub — Tohmo</div>
+    <div class="steps"><div id="s1" class="on"></div><div id="s2"></div><div id="s3"></div></div>
+
+    <!-- STEP 1 : choix du type -->
+    <div id="screen1" class="on">
+      <div class="type-grid">
+        <div class="type-card" data-type="badge"><span class="ico">🪪</span><span class="lbl">Badge</span></div>
+        <div class="type-card" data-type="courrier"><span class="ico">✉️</span><span class="lbl">Courrier</span></div>
+        <div class="type-card" data-type="panne_casse"><span class="ico">🛠️</span><span class="lbl">Panne / Casse</span></div>
+        <div class="type-card" data-type="casier"><span class="ico">🗄️</span><span class="lbl">Casier</span></div>
+        <div class="type-card" data-type="proprete"><span class="ico">🧹</span><span class="lbl">Propreté</span></div>
+        <div class="type-card" data-type="autre"><span class="ico">💬</span><span class="lbl">Autre</span></div>
+      </div>
+      <div class="actions"><button class="primary" id="btnNext1" disabled onclick="allerStep2()">Continuer</button></div>
+    </div>
+
+    <!-- STEP 2 : champs spécifiques -->
+    <div id="screen2">
+      <div id="champsSpecifiques"></div>
+      <div id="err2" class="err"></div>
+      <div class="actions">
+        <button class="ghost" onclick="retourStep1()">← Retour</button>
+        <button class="primary" id="btnEnvoyer" onclick="envoyer()">Envoyer la demande</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 : confirmation -->
+    <div id="screen3">
+      <div class="confirm">
+        <div class="check">✅</div>
+        <div>Votre demande a bien été envoyée.</div>
+        <div class="id" id="ticketId"></div>
+        <div class="sub">Conservez cette référence si vous devez nous recontacter.</div>
+        <div class="actions"><button class="primary" onclick="recommencer()">Faire une nouvelle demande</button></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+var SR = (typeof google!=='undefined' && google.script && google.script.run);
+function srv(fn, args, cb) {
+  if (SR) {
+    var r = google.script.run.withSuccessHandler(cb).withFailureHandler(function(e){ document.getElementById('err2').textContent = 'Erreur : ' + e.message; setLoading(false); });
+    r[fn].apply(r, args || []);
+  } else {
+    setTimeout(function(){ cb(fn === 'addTicketPublic' ? 'TIK-MOCK-' + Math.floor(Math.random()*900+100) : (fn === 'uploadPhotoTicket' ? 'https://example.com/mock-photo.jpg' : null)); }, 300);
+  }
+}
+
+var TYPE_CHOISI = null;
+var PHOTO_BASE64 = null, PHOTO_NOM = null, PHOTO_MIME = null;
+
+document.querySelectorAll('.type-card').forEach(function(card){
+  card.addEventListener('click', function(){
+    document.querySelectorAll('.type-card').forEach(function(c){ c.classList.remove('selected'); });
+    card.classList.add('selected');
+    TYPE_CHOISI = card.getAttribute('data-type');
+    document.getElementById('btnNext1').disabled = false;
+  });
+});
+
+function setStep(n) {
+  [1,2,3].forEach(function(i){
+    document.getElementById('s'+i).classList.toggle('on', i<=n);
+    document.getElementById('screen'+i).classList.toggle('on', i===n);
+  });
+}
+
+function allerStep2() {
+  document.getElementById('champsSpecifiques').innerHTML = champsPourType(TYPE_CHOISI);
+  setStep(2);
+}
+function retourStep1() { setStep(1); }
+
+function champ(id, label, type, options) {
+  type = type || 'text';
+  if (type === 'select') {
+    return '<div class="form-row"><label>'+label+'</label><select id="'+id+'">'
+      + options.map(function(o){ return '<option value="'+o+'">'+o+'</option>'; }).join('')
+      + '</select></div>';
+  }
+  if (type === 'textarea') return '<div class="form-row"><label>'+label+'</label><textarea id="'+id+'"></textarea></div>';
+  if (type === 'file') return '<div class="form-row"><label>'+label+'</label><input type="file" id="'+id+'" accept="image/*"></div>';
+  return '<div class="form-row"><label>'+label+'</label><input type="'+type+'" id="'+id+'"></div>';
+}
+
+function champsPourType(type) {
+  var sites = ['Paris','Lyon','Marseille','Bordeaux']; // doit correspondre à SITES_TICKETS côté serveur
+  if (type === 'badge') {
+    return champ('cPrenom','Prénom') + champ('cNom','Nom') + champ('cEmail','Email','email')
+      + champ('cSite','Site','select',sites) + champ('cMotif','Motif de la demande','textarea');
+  }
+  if (type === 'courrier') {
+    return champ('cDestinataire','Destinataire') + champ('cTypeEnvoi','Type d\'envoi','select',['Standard','Recommandé','Colis'])
+      + champ('cUrgence','Urgence','select',['Normale','Urgente']);
+  }
+  if (type === 'panne_casse') {
+    return champ('cLocalisation','Localisation (bureau, étage...)') + champ('cDescription','Description du problème','textarea')
+      + champ('cPhoto','Photo (optionnel)','file');
+  }
+  if (type === 'casier') {
+    return champ('cPrenom','Prénom') + champ('cNom','Nom') + champ('cEtage','Étage souhaité','select',['RDC','1er','2e','3e','4e et +','Peu importe']);
+  }
+  if (type === 'proprete') {
+    return champ('cLocalisation','Localisation') + champ('cDescription','Description','textarea');
+  }
+  // autre
+  return champ('cSujet','Sujet') + champ('cDescription','Description','textarea');
+}
+
+function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+function setLoading(on) {
+  document.getElementById('btnEnvoyer').disabled = on;
+  document.getElementById('btnEnvoyer').textContent = on ? 'Envoi...' : 'Envoyer la demande';
+}
+
+function envoyer() {
+  document.getElementById('err2').textContent = '';
+  var data = { type: TYPE_CHOISI, donnees: {} };
+
+  if (TYPE_CHOISI === 'badge') {
+    if (!val('cPrenom') || !val('cNom') || !val('cEmail')) { document.getElementById('err2').textContent = 'Merci de remplir prénom, nom et email.'; return; }
+    data.demandeur_nom = val('cPrenom') + ' ' + val('cNom');
+    data.demandeur_email = val('cEmail');
+    data.site = val('cSite');
+    data.objet = 'Demande de badge — ' + data.demandeur_nom;
+    data.donnees = { motif: val('cMotif') };
+  } else if (TYPE_CHOISI === 'courrier') {
+    if (!val('cDestinataire')) { document.getElementById('err2').textContent = 'Merci d\'indiquer le destinataire.'; return; }
+    data.objet = 'Courrier pour ' + val('cDestinataire');
+    data.priorite = val('cUrgence') === 'Urgente' ? 'Urgente' : 'Normale';
+    data.donnees = { destinataire: val('cDestinataire'), type_envoi: val('cTypeEnvoi') };
+  } else if (TYPE_CHOISI === 'panne_casse') {
+    if (!val('cDescription')) { document.getElementById('err2').textContent = 'Merci de décrire le problème.'; return; }
+    data.objet = 'Panne / casse — ' + val('cLocalisation');
+    data.localisation = val('cLocalisation');
+    data.description = val('cDescription');
+    var fileInput = document.getElementById('cPhoto');
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+      var file = fileInput.files[0];
+      var reader = new FileReader();
+      reader.onload = function(){
+        var base64 = reader.result.split(',')[1];
+        setLoading(true);
+        srv('uploadPhotoTicket', [base64, file.name, file.type], function(url){
+          data.donnees.photo_url = url;
+          finaliserEnvoi(data);
+        });
+      };
+      reader.readAsDataURL(file);
+      return; // finaliserEnvoi appelé après upload
+    }
+  } else if (TYPE_CHOISI === 'casier') {
+    if (!val('cPrenom') || !val('cNom')) { document.getElementById('err2').textContent = 'Merci d\'indiquer prénom et nom.'; return; }
+    data.demandeur_nom = val('cPrenom') + ' ' + val('cNom');
+    data.objet = 'Demande de casier — ' + data.demandeur_nom;
+    data.donnees = { etage_souhaite: val('cEtage') };
+  } else if (TYPE_CHOISI === 'proprete') {
+    if (!val('cDescription')) { document.getElementById('err2').textContent = 'Merci de décrire le problème.'; return; }
+    data.objet = 'Propreté — ' + val('cLocalisation');
+    data.localisation = val('cLocalisation');
+    data.description = val('cDescription');
+  } else if (TYPE_CHOISI === 'autre') {
+    if (!val('cSujet')) { document.getElementById('err2').textContent = 'Merci d\'indiquer un sujet.'; return; }
+    data.objet = val('cSujet');
+    data.description = val('cDescription');
+  }
+
+  finaliserEnvoi(data);
+}
+
+function finaliserEnvoi(data) {
+  setLoading(true);
+  srv('addTicketPublic', [data], function(id){
+    setLoading(false);
+    document.getElementById('ticketId').textContent = id;
+    setStep(3);
+  });
+}
+
+function recommencer() {
+  TYPE_CHOISI = null;
+  document.querySelectorAll('.type-card').forEach(function(c){ c.classList.remove('selected'); });
+  document.getElementById('btnNext1').disabled = true;
+  setStep(1);
+}
+</script>
+</body>
+</html>
